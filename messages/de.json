@@ -32,7 +32,8 @@
     "extractError": {
       "empty": "Kein auslesbarer Text in der Datei.",
       "empty-or-scanned": "Kein auslesbarer Text – möglicherweise ein gescanntes PDF ohne Textebene.",
-      "unsupported-type": "Nicht unterstützter Dateityp."
+      "unsupported-type": "Nicht unterstützter Dateityp.",
+      "ocr-failed": "Die Texterkennung (OCR) ist fehlgeschlagen. Bitte später erneut versuchen (evtl. Kontingent erschöpft oder Dokument zu groß)."
     }
   }
 }

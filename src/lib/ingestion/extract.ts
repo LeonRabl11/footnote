@@ -20,7 +20,11 @@ export type ExtractResult = {
 };
 
 // Codes statt fertiger Texte – die UI übersetzt sie über next-intl.
-export type ExtractionErrorCode = 'empty' | 'empty-or-scanned' | 'unsupported-type';
+export type ExtractionErrorCode =
+  | 'empty'
+  | 'empty-or-scanned'
+  | 'unsupported-type'
+  | 'ocr-failed';
 
 export class ExtractionError extends Error {
   readonly code: ExtractionErrorCode;
@@ -43,15 +47,11 @@ function normalizePdfText(text: string): string {
     .trim();
 }
 
-// Seitenweise extrahieren und Volltext + Seiten-Map bauen. Die Seiten werden
-// mit "\n" verbunden; jede PageSpan beschreibt den Bereich [charStart, charEnd)
-// ihrer Seite im zusammengefügten Text.
-async function extractPdf(bytes: Uint8Array): Promise<ExtractResult> {
-  // Bundled serverless-Build von PDF.js (Default – kein eigener pdfjs/canvas).
-  const pdf = await getDocumentProxy(new Uint8Array(bytes));
-  const { text } = await extractPdfText(pdf, { mergePages: false }); // string[]
-  const pageTexts = text.map(normalizePdfText);
-
+// Baut aus Seiten-Strings den Volltext + Seiten-Map. Die Seiten werden mit "\n"
+// verbunden; jede PageSpan beschreibt den Bereich [charStart, charEnd) ihrer
+// Seite im zusammengefügten Text. Wird von der unpdf-Extraktion UND vom
+// OCR-Fallback genutzt, damit beide dasselbe Format liefern.
+export function buildPagedResult(pageTexts: string[]): ExtractResult {
   const pages: PageSpan[] = [];
   let cursor = 0;
   for (let i = 0; i < pageTexts.length; i++) {
@@ -60,8 +60,15 @@ async function extractPdf(bytes: Uint8Array): Promise<ExtractResult> {
     pages.push({ pageNumber: i + 1, charStart, charEnd });
     cursor = charEnd + 1; // +1 für den "\n"-Trenner zwischen den Seiten
   }
-
   return { text: pageTexts.join('\n'), pages };
+}
+
+// Seitenweise aus der PDF-Textebene extrahieren (kein OCR).
+async function extractPdf(bytes: Uint8Array): Promise<ExtractResult> {
+  // Bundled serverless-Build von PDF.js (Default – kein eigener pdfjs/canvas).
+  const pdf = await getDocumentProxy(new Uint8Array(bytes));
+  const { text } = await extractPdfText(pdf, { mergePages: false }); // string[]
+  return buildPagedResult(text.map(normalizePdfText));
 }
 
 export async function extractText(bytes: Uint8Array, sourceType: string): Promise<ExtractResult> {
@@ -77,9 +84,25 @@ export async function extractText(bytes: Uint8Array, sourceType: string): Promis
     }
 
     case 'pdf': {
-      const result = await extractPdf(bytes);
-      // Leerer/fast leerer Text bei PDFs deutet auf ein gescanntes Bild-PDF
-      // ohne Textebene hin (kein OCR – wird abgelehnt).
+      let result = await extractPdf(bytes);
+
+      // Leere/fast leere Textebene -> gescanntes Bild-PDF. Statt sofort
+      // abzulehnen: OCR-Fallback über Gemini (multimodal). Dynamischer Import,
+      // damit Provider/SDK nur bei Bedarf geladen werden (und kein Import-Zyklus).
+      if (result.text.trim().length === 0) {
+        try {
+          const { ocrPdf } = await import('./ocr');
+          result = await ocrPdf(bytes);
+        } catch (error) {
+          // API-/Rate-Limit-/sonstige OCR-Fehler verständlich melden, nicht crashen.
+          throw new ExtractionError(
+            'ocr-failed',
+            error instanceof Error ? error.message : 'OCR fehlgeschlagen.',
+          );
+        }
+      }
+
+      // Auch nach OCR nichts lesbar -> wirklich kein Text vorhanden.
       if (result.text.trim().length === 0) {
         throw new ExtractionError(
           'empty-or-scanned',

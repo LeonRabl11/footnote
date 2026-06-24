@@ -32,7 +32,8 @@
     "extractError": {
       "empty": "No readable text in the file.",
       "empty-or-scanned": "No readable text – possibly a scanned PDF without a text layer.",
-      "unsupported-type": "Unsupported file type."
+      "unsupported-type": "Unsupported file type.",
+      "ocr-failed": "Text recognition (OCR) failed. Please try again later (quota may be exhausted or the document too large)."
     }
   }
 }
