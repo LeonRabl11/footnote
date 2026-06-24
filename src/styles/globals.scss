@@ -1,0 +1,27 @@
+// Globale Basis-Styles. Tokens werden hier einmalig eingebunden, damit die
+// CSS Custom Properties (:root { --… }) app-weit verfügbar sind.
+@use 'tokens';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+a {
+  color: var(--color-accent);
+}

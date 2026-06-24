@@ -1,0 +1,7 @@
+# pnpm 11+: native Build-Skripte werden standardmäßig blockiert.
+# Hier explizit erlauben, was einen nativen Build braucht.
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  esbuild: true
+  sharp: true

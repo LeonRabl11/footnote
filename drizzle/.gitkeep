@@ -1,0 +1,2 @@
+# Hält den (noch leeren) Migrations-Ordner im Git-Verlauf.
+# Generierte Migrationen (drizzle-kit generate) landen hier.
