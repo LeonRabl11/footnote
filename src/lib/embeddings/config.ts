@@ -17,3 +17,7 @@
 export const EMBEDDING_MODEL = 'gemini-embedding-001' as const;
 export const EMBEDDING_DIMENSIONS = 1536 as const;
 export const EMBEDDING_DISTANCE = 'cosine' as const;
+
+// Generierungs-Modell (Single Source of Truth). gemini-3.5-flash ist das
+// aktuelle stabile Flash-Modell und im Free-Tier nutzbar (Stand: 2026-06).
+export const GENERATION_MODEL = 'gemini-3.5-flash' as const;
