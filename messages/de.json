@@ -1,8 +1,16 @@
 {
-  "Home": {
+  "Chat": {
     "title": "Footnote",
-    "tagline": "Der Wissensassistent, der jede Antwort mit ihrer Quelle belegt.",
-    "placeholder": "Platzhalter-Oberfläche – die Funktionslogik folgt in späteren Schritten."
+    "tagline": "Stelle eine Frage zu deinen Dokumenten – jede Antwort wird mit ihrer Quelle belegt.",
+    "uploadLink": "Dokumente hochladen",
+    "empty": "Noch keine Fragen. Stelle unten deine erste Frage.",
+    "you": "Du",
+    "assistant": "Footnote",
+    "sources": "Quellen",
+    "thinking": "Suche und formuliere Antwort …",
+    "placeholder": "Frage zu deinen Dokumenten …",
+    "send": "Senden",
+    "error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut."
   },
   "Ingest": {
     "title": "Dokument hochladen",

@@ -63,6 +63,10 @@ export async function answer(query: string) {
     system: SYSTEM_PROMPT,
     prompt,
     temperature: 0.2,
+    providerOptions: {
+      // gemini-3.x "denkt" vor der Antwort; niedriges Level => streamt früher los.
+      google: { thinkingConfig: { thinkingLevel: 'low' } },
+    },
   });
 
   return { result, sources: dedupeSources(hits), hits };

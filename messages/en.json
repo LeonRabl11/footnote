@@ -1,8 +1,16 @@
 {
-  "Home": {
+  "Chat": {
     "title": "Footnote",
-    "tagline": "The knowledge assistant that backs every answer with its source.",
-    "placeholder": "Placeholder UI – the feature logic follows in later steps."
+    "tagline": "Ask a question about your documents – every answer is backed by its source.",
+    "uploadLink": "Upload documents",
+    "empty": "No questions yet. Ask your first question below.",
+    "you": "You",
+    "assistant": "Footnote",
+    "sources": "Sources",
+    "thinking": "Searching and composing an answer …",
+    "placeholder": "Ask about your documents …",
+    "send": "Send",
+    "error": "Something went wrong. Please try again."
   },
   "Ingest": {
     "title": "Upload document",

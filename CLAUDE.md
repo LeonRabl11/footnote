@@ -39,4 +39,4 @@ Footnote ist ein RAG-Wissensassistent, der Fragen aus der Dokumentation beantwor
 
 ## Aktueller Stand
 
-Grundgerüst + DB-Schema. `src/lib/db/schema.ts` definiert `documents` und `chunks` (mit `vector(1536)` + HNSW/cosine); erste Migration unter `drizzle/0000_*.sql` generiert (noch nicht angewendet). Ingestion/Embedding/Retrieval-Logik fehlt noch.
+Meilenstein 1 (MVP) steht: Schema (`documents`/`chunks`, `vector(1536)` + HNSW/cosine, Migration `drizzle/0000_*.sql`), Ingestion (`src/lib/ingestion/*`, Upload unter `/ingest`), Retrieval + belegte Antwort (`src/lib/retrieval/*`, Generierung `gemini-3.5-flash`) und Chat-UI auf der Startseite (`useChat` → `/api/chat`, Quellen via `messageMetadata`). Generierungs-Modell-Konstante: `GENERATION_MODEL` in `src/lib/embeddings/config.ts`.
