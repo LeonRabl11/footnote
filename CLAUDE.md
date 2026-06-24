@@ -32,11 +32,11 @@ Footnote ist ein RAG-Wissensassistent, der Fragen aus der Dokumentation beantwor
 
 ## Projekt-Leitplanken (für spätere Schritte)
 
-- **Genau EIN** Gemini-Embedding-Modell durchgängig verwenden – niemals mischen, sonst sind die Vektoren inkompatibel.
-- Die Embedding-Spalte hat eine **feste Vektor-Länge**, die zum gewählten Gemini-Modell passen muss.
+- **Genau EIN** Gemini-Embedding-Modell durchgängig: **`gemini-embedding-001`**, **1536** Dimensionen, Distanz **Cosine**. Niemals mischen, sonst sind die Vektoren inkompatibel. Single Source of Truth: `src/lib/embeddings/config.ts` – Modell/Länge stehen nur dort.
+- Die Embedding-Spalte ist `vector(1536)`; der HNSW-Index nutzt `vector_cosine_ops` (passend zum Cosine-Operator `<=>`). Änderung der Länge/des Modells = alle Embeddings neu erzeugen + neue Migration.
 - **Ingestion ist alles-oder-nichts** in EINER Transaktion.
 - Antworten **ausschließlich** aus den abgerufenen Stücken, **immer mit Quellenangabe**. Sonst: „steht nicht in der Wissensbasis“.
 
 ## Aktueller Stand
 
-Nur Grundgerüst. `src/lib/db/schema.ts` ist absichtlich leer – `documents`/`chunks` und die feste Vektor-Länge werden erst nach Wahl des Embedding-Modells angelegt.
+Grundgerüst + DB-Schema. `src/lib/db/schema.ts` definiert `documents` und `chunks` (mit `vector(1536)` + HNSW/cosine); erste Migration unter `drizzle/0000_*.sql` generiert (noch nicht angewendet). Ingestion/Embedding/Retrieval-Logik fehlt noch.
