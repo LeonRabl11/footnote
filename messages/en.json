@@ -13,7 +13,8 @@
     "searching": "Searching the knowledge base …",
     "placeholder": "Ask about your documents …",
     "send": "Send",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "quotaExhausted": "The daily quota of all models has been reached. Please try again later."
   },
   "Ingest": {
     "title": "Upload document",

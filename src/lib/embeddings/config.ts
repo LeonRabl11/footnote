@@ -18,6 +18,12 @@ export const EMBEDDING_MODEL = 'gemini-embedding-001' as const;
 export const EMBEDDING_DIMENSIONS = 1536 as const;
 export const EMBEDDING_DISTANCE = 'cosine' as const;
 
-// Generierungs-Modell (Single Source of Truth). gemini-3.5-flash ist das
-// aktuelle stabile Flash-Modell und im Free-Tier nutzbar (Stand: 2026-06).
-export const GENERATION_MODEL = 'gemini-3.5-flash' as const;
+// Generierungs-Modelle (Single Source of Truth), GEORDNET nach Präferenz.
+// Das AI SDK hat KEINEN eingebauten Modell-Array-Fallback – die Schleife, die
+// bei erschöpftem Free-Tier-Kontingent (429) das nächste Modell versucht, ist
+// in answer.ts selbst gebaut. Alle Einträge sind Free-Tier-Flash-Modelle.
+export const GENERATION_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-3.5-flash',
+  'gemini-2.5-flash-lite',
+] as const;

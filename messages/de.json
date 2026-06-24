@@ -13,7 +13,8 @@
     "searching": "Suche in der Wissensbasis …",
     "placeholder": "Frage zu deinen Dokumenten …",
     "send": "Senden",
-    "error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut."
+    "error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+    "quotaExhausted": "Das Tageskontingent aller Modelle ist erreicht. Bitte später erneut versuchen."
   },
   "Ingest": {
     "title": "Dokument hochladen",

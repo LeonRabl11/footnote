@@ -1,7 +1,7 @@
 import 'server-only';
 import { generateText } from 'ai';
 import { google } from '@/lib/embeddings/provider';
-import { GENERATION_MODEL } from '@/lib/embeddings/config';
+import { GENERATION_MODELS } from '@/lib/embeddings/config';
 import { buildPagedResult, type ExtractResult } from './extract';
 
 // Marker, mit dem Gemini die Seiten trennt (siehe Prompt).
@@ -25,7 +25,9 @@ Regeln:
  */
 export async function ocrPdf(bytes: Uint8Array): Promise<ExtractResult> {
   const { text } = await generateText({
-    model: google(GENERATION_MODEL),
+    // OCR nutzt das bevorzugte Modell (kein Fallback – nur die Antwort-Generierung
+    // ist quota-kritisch und fällt zurück).
+    model: google(GENERATION_MODELS[0]),
     temperature: 0, // deterministische, wörtliche Transkription
     providerOptions: {
       // Hohe Medienauflösung für bessere OCR-Qualität.

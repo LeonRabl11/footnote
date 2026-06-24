@@ -121,7 +121,7 @@ export default function ChatPage() {
 
       {error && (
         <p className={styles.error} role="alert">
-          {t('error')}
+          {error.message?.includes('quota-exhausted') ? t('quotaExhausted') : t('error')}
         </p>
       )}
 
