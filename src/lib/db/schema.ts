@@ -45,6 +45,10 @@ export const chunks = pgTable(
     // Optional: Zeichen-Offsets für präzisere Quellen-Verweise.
     charStart: integer('char_start'),
     charEnd: integer('char_end'),
+    // Start-Position des Chunks für die Quellenangabe (1-basiert).
+    // page ist null für .md/.txt (keine Seiten).
+    page: integer('page'),
+    line: integer('line'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => [

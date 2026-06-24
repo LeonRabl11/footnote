@@ -7,6 +7,8 @@
     "you": "Du",
     "assistant": "Footnote",
     "sources": "Quellen",
+    "sourceText": "(Zeile {line})",
+    "sourcePdf": "(S. {page}, Zeile {line})",
     "thinking": "Suche und formuliere Antwort …",
     "placeholder": "Frage zu deinen Dokumenten …",
     "send": "Senden",

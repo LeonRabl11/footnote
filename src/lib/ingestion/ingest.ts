@@ -4,7 +4,13 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { documents, chunks } from '@/lib/db/schema';
 import { embedTexts } from '@/lib/embeddings/embed';
-import { extractText, ExtractionError, type ExtractionErrorCode } from './extract';
+import {
+  extractText,
+  locatePosition,
+  ExtractionError,
+  type ExtractionErrorCode,
+  type PageSpan,
+} from './extract';
 import { chunkText } from './chunk';
 
 export type IngestInput = {
@@ -23,8 +29,9 @@ export type IngestResult =
 export async function ingest(input: IngestInput): Promise<IngestResult> {
   // 1. Extrahieren (kann mit ExtractionError abbrechen).
   let text: string;
+  let pages: PageSpan[];
   try {
-    text = await extractText(input.bytes, input.sourceType);
+    ({ text, pages } = await extractText(input.bytes, input.sourceType));
   } catch (error) {
     if (error instanceof ExtractionError) {
       return { status: 'error', message: error.message, code: error.code };
@@ -81,15 +88,21 @@ export async function ingest(input: IngestInput): Promise<IngestResult> {
       contentHash,
     }),
     db.insert(chunks).values(
-      chunkList.map((c, i) => ({
-        documentId,
-        content: c.content,
-        embedding: embeddings[i],
-        chunkIndex: c.chunkIndex,
-        tokenCount: c.tokenCount,
-        charStart: c.charStart,
-        charEnd: c.charEnd,
-      })),
+      chunkList.map((c, i) => {
+        // Start-Position des Chunks für die Quellenangabe (Seite/Zeile).
+        const { page, line } = locatePosition(text, pages, c.charStart);
+        return {
+          documentId,
+          content: c.content,
+          embedding: embeddings[i],
+          chunkIndex: c.chunkIndex,
+          tokenCount: c.tokenCount,
+          charStart: c.charStart,
+          charEnd: c.charEnd,
+          page,
+          line,
+        };
+      }),
     ),
   ]);
 

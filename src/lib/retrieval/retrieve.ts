@@ -11,6 +11,9 @@ export type RetrievalHit = {
   documentId: string;
   documentTitle: string;
   documentSource: string;
+  documentSourceType: string; // "md" | "txt" | "pdf"
+  page: number | null; // Start-Seite (null für .md/.txt)
+  line: number | null; // Start-Zeile
   similarity: number; // 1 - Cosine-Distanz, nur zur Anzeige/Debug
 };
 
@@ -33,6 +36,9 @@ export async function retrieve(query: string, topK = 5): Promise<RetrievalHit[]>
       documentId: documents.id,
       documentTitle: documents.title,
       documentSource: documents.source,
+      documentSourceType: documents.sourceType,
+      page: chunks.page,
+      line: chunks.line,
       similarity,
     })
     .from(chunks)

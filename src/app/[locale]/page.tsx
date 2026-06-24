@@ -71,7 +71,7 @@ export default function ChatPage() {
                   <span className={styles.sourcesLabel}>{t('sources')}</span>
                   <ul className={styles.sourcesList}>
                     {sources.map((source) => (
-                      <li key={source.documentId}>
+                      <li key={`${source.documentId}:${source.page}:${source.line}`}>
                         {isHttpUrl(source.documentSource) ? (
                           <a
                             href={source.documentSource}
@@ -82,6 +82,14 @@ export default function ChatPage() {
                           </a>
                         ) : (
                           source.documentTitle
+                        )}
+                        {source.line != null && (
+                          <span className={styles.position}>
+                            {' '}
+                            {source.sourceType === 'pdf' && source.page != null
+                              ? t('sourcePdf', { page: source.page, line: source.line })
+                              : t('sourceText', { line: source.line })}
+                          </span>
                         )}
                       </li>
                     ))}

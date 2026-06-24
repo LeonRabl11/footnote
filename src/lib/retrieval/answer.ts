@@ -24,18 +24,26 @@ export type AnswerSource = {
   documentId: string;
   documentTitle: string;
   documentSource: string;
+  sourceType: string; // "md" | "txt" | "pdf"
+  page: number | null;
+  line: number | null;
 };
 
 function dedupeSources(hits: RetrievalHit[]): AnswerSource[] {
   const seen = new Set<string>();
   const sources: AnswerSource[] = [];
   for (const hit of hits) {
-    if (seen.has(hit.documentId)) continue;
-    seen.add(hit.documentId);
+    // Nach Fundstelle deduplizieren: gleiche Datei, aber andere Seite/Zeile bleibt erhalten.
+    const key = `${hit.documentId}:${hit.page}:${hit.line}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     sources.push({
       documentId: hit.documentId,
       documentTitle: hit.documentTitle,
       documentSource: hit.documentSource,
+      sourceType: hit.documentSourceType,
+      page: hit.page,
+      line: hit.line,
     });
   }
   return sources;
