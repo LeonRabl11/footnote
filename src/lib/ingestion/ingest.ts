@@ -65,21 +65,21 @@ export async function ingest(input: IngestInput): Promise<IngestResult> {
     };
   }
 
-  // 5. Speichern – alles-oder-nichts in EINER Transaktion.
-  // documentId vorab erzeugen, damit die chunks ihn ohne RETURNING referenzieren
-  // können (kompatibel mit dem Neon-HTTP-Treiber).
+  // 5. Speichern – alles-oder-nichts via db.batch (atomar über Neon-HTTP;
+  // der Neon-HTTP-Treiber unterstützt keine interaktiven Transaktionen).
+  // documentId steht clientseitig per randomUUID() fest, daher referenzieren
+  // die chunks sie direkt ohne RETURNING.
   const documentId = randomUUID();
 
-  await db.transaction(async (tx) => {
-    await tx.insert(documents).values({
+  await db.batch([
+    db.insert(documents).values({
       id: documentId,
       title: input.title,
       source: input.source,
       sourceType: input.sourceType,
       contentHash,
-    });
-
-    await tx.insert(chunks).values(
+    }),
+    db.insert(chunks).values(
       chunkList.map((c, i) => ({
         documentId,
         content: c.content,
@@ -89,8 +89,8 @@ export async function ingest(input: IngestInput): Promise<IngestResult> {
         charStart: c.charStart,
         charEnd: c.charEnd,
       })),
-    );
-  });
+    ),
+  ]);
 
   return { status: 'created', documentId, chunkCount: chunkList.length };
 }
