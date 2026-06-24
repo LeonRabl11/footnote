@@ -10,6 +10,7 @@
     "sourceText": "(line {line})",
     "sourcePdf": "(p. {page}, line {line})",
     "thinking": "Searching and composing an answer …",
+    "searching": "Searching the knowledge base …",
     "placeholder": "Ask about your documents …",
     "send": "Send",
     "error": "Something went wrong. Please try again."

@@ -55,6 +55,12 @@ export default function ChatPage() {
           const sources =
             message.role === 'assistant' ? message.metadata?.sources ?? [] : [];
           const isUser = message.role === 'user';
+          // Läuft gerade ein Such-Tool-Aufruf? (Tool-Part noch ohne Ergebnis.)
+          const isSearching = message.parts.some(
+            (part) =>
+              part.type === 'tool-searchKnowledgeBase' &&
+              (part.state === 'input-streaming' || part.state === 'input-available'),
+          );
 
           return (
             <article
@@ -65,6 +71,12 @@ export default function ChatPage() {
                 {isUser ? t('you') : t('assistant')}
               </span>
               <div className={styles.text}>{text}</div>
+
+              {isSearching && (
+                <p className={styles.pending} role="status">
+                  {t('searching')}
+                </p>
+              )}
 
               {sources.length > 0 && (
                 <div className={styles.sources}>

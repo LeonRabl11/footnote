@@ -1,24 +1,29 @@
 import 'server-only';
-import { streamText } from 'ai';
+import { streamText, stepCountIs, convertToModelMessages, type UIMessage } from 'ai';
 import { google } from '@/lib/embeddings/provider';
 import { GENERATION_MODEL } from '@/lib/embeddings/config';
-import { retrieve, type RetrievalHit } from './retrieve';
+import { createSearchTool } from './search-tool';
 
-// Antwortet exakt mit diesem Satz, wenn der Kontext die Frage nicht hergibt.
+// Antwortet exakt mit diesem Satz, wenn die Suchen nichts Passendes liefern.
 export const NOT_IN_KNOWLEDGE_BASE = 'Das steht nicht in der Wissensbasis.';
 
-// Strenger Grounding-Prompt. Die "nicht in der Wissensbasis"-Garantie kommt
-// bewusst aus DIESER Anweisung, NICHT aus einem Similarity-Schwellenwert.
+// Sicherheitslimit: max. 4 Schritte (eine typische Frage braucht ~2). Jeder
+// Schritt ist eine Modell-Anfrage – klein halten (Free-Tier-Quota).
+const MAX_STEPS = 4;
+
+// Strenger, agentic Grounding-Prompt. Die "nicht in der Wissensbasis"-Garantie
+// kommt aus DIESER Anweisung, nicht aus einem Similarity-Schwellenwert.
 const SYSTEM_PROMPT = `Du bist der Wissensassistent "Footnote".
-Beantworte die Frage AUSSCHLIESSLICH auf Grundlage des bereitgestellten Kontexts.
-Nutze KEIN externes Wissen und rate nicht.
+Du hast ein Such-Werkzeug (searchKnowledgeBase). Beantworte Fragen zu den Dokumenten,
+indem du damit passende Passagen suchst.
 
 Regeln:
-- Stütze jede Aussage nur auf den Kontext.
-- Nenne die Quelle (Dokumenttitel), auf die du dich stützt.
-- Steht die Antwort nicht im Kontext, antworte exakt mit: "${NOT_IN_KNOWLEDGE_BASE}"
-- Antworte in der Sprache der Frage.
-- Erfinde nichts und nenne keine Quellen, die nicht im Kontext stehen.`;
+- Antworte AUSSCHLIESSLICH auf Grundlage der gefundenen Passagen. Nutze KEIN externes
+  Wissen und rate nicht.
+- Nenne die Quelle (Dokumenttitel; falls vorhanden Seite/Zeile).
+- Liefern die Suchen nichts Passendes, antworte exakt mit: "${NOT_IN_KNOWLEDGE_BASE}"
+- Bei mehrteiligen Fragen pro Teilfrage einmal suchen.
+- Antworte in der Sprache der Frage.`;
 
 export type AnswerSource = {
   documentId: string;
@@ -29,53 +34,36 @@ export type AnswerSource = {
   line: number | null;
 };
 
-function dedupeSources(hits: RetrievalHit[]): AnswerSource[] {
-  const seen = new Set<string>();
-  const sources: AnswerSource[] = [];
-  for (const hit of hits) {
-    // Nach Fundstelle deduplizieren: gleiche Datei, aber andere Seite/Zeile bleibt erhalten.
-    const key = `${hit.documentId}:${hit.page}:${hit.line}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    sources.push({
-      documentId: hit.documentId,
-      documentTitle: hit.documentTitle,
-      documentSource: hit.documentSource,
-      sourceType: hit.documentSourceType,
-      page: hit.page,
-      line: hit.line,
-    });
-  }
-  return sources;
-}
-
-function buildContext(hits: RetrievalHit[]): string {
-  return hits
-    .map((hit) => `[Quelle: ${hit.documentTitle}]\n${hit.content}`)
-    .join('\n\n---\n\n');
-}
-
 /**
- * Holt passende Chunks und lässt Gemini Flash eine belegte Antwort streamen,
- * die NUR aus diesen Chunks schöpft. Gibt Stream + (dedup.) Quellen zurück;
- * `hits` ist für Debug/Anzeige der Treffer-Details enthalten.
+ * Agentic Antwort: das Modell entscheidet selbst, ob/wie oft es die Wissensbasis
+ * durchsucht (Tool-Calling), bis zu MAX_STEPS. Gibt den Stream zurück sowie den
+ * anfrage-lokalen Quellen-Sammler, der während des Laufs befüllt wird und beim
+ * finish-Part als messageMetadata angehängt wird (Format unverändert).
  */
-export async function answer(query: string) {
-  const hits = await retrieve(query);
-
-  const context = buildContext(hits);
-  const prompt = `Kontext:\n\n${context}\n\nFrage: ${query}`;
+export async function answer(messages: UIMessage[]) {
+  const { searchKnowledgeBase, sources } = createSearchTool();
+  const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
     model: google(GENERATION_MODEL),
     system: SYSTEM_PROMPT,
-    prompt,
+    messages: modelMessages,
+    tools: { searchKnowledgeBase },
+    stopWhen: stepCountIs(MAX_STEPS),
     temperature: 0.2,
     providerOptions: {
       // gemini-3.x "denkt" vor der Antwort; niedriges Level => streamt früher los.
       google: { thinkingConfig: { thinkingLevel: 'low' } },
     },
+    onStepFinish:
+      process.env.NODE_ENV !== 'production'
+        ? ({ toolCalls }) => {
+            for (const call of toolCalls) {
+              console.log(`[agent] ${call.toolName}(${JSON.stringify(call.input)})`);
+            }
+          }
+        : undefined,
   });
 
-  return { result, sources: dedupeSources(hits), hits };
+  return { result, sources };
 }

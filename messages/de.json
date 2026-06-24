@@ -10,6 +10,7 @@
     "sourceText": "(Zeile {line})",
     "sourcePdf": "(S. {page}, Zeile {line})",
     "thinking": "Suche und formuliere Antwort …",
+    "searching": "Suche in der Wissensbasis …",
     "placeholder": "Frage zu deinen Dokumenten …",
     "send": "Senden",
     "error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut."
