@@ -1,0 +1,2 @@
+ALTER TABLE "chunks" ADD COLUMN "content_search" "tsvector" GENERATED ALWAYS AS (to_tsvector('simple', "chunks"."content")) STORED NOT NULL;--> statement-breakpoint
+CREATE INDEX "chunks_content_search_gin_idx" ON "chunks" USING gin ("content_search");

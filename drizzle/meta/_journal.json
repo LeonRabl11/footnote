@@ -15,6 +15,13 @@
       "when": 1782301499285,
       "tag": "0001_loud_thaddeus_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782305025420,
+      "tag": "0002_supreme_stardust",
+      "breakpoints": true
     }
   ]
 }

@@ -5,6 +5,7 @@
 // src/lib/embeddings/config.ts – KEINE fest eingetippte Zahl hier.
 // ============================================================================
 
+import { sql, type SQL } from 'drizzle-orm';
 import {
   pgTable,
   uuid,
@@ -13,8 +14,16 @@ import {
   timestamp,
   vector,
   index,
+  customType,
 } from 'drizzle-orm/pg-core';
 import { EMBEDDING_DIMENSIONS } from '@/lib/embeddings/config';
+
+// Postgres tsvector – von Drizzle nicht nativ unterstützt, daher als customType.
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return 'tsvector';
+  },
+});
 
 // -- documents ---------------------------------------------------------------
 // Ein eingelesenes Quelldokument.
@@ -50,6 +59,13 @@ export const chunks = pgTable(
     page: integer('page'),
     line: integer('line'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
+    // Generierte, gespeicherte tsvector-Spalte für die Wort-Suche. Konfiguration
+    // 'simple' (sprachneutral, gemischtes de/en-Corpus) – MUSS identisch zur
+    // Query-Konfiguration sein, sonst nutzt Postgres den GIN-Index nicht.
+    // STORED -> bestehende Zeilen werden beim ALTER automatisch befüllt.
+    contentSearch: tsvector('content_search')
+      .notNull()
+      .generatedAlwaysAs((): SQL => sql`to_tsvector('simple', ${chunks.content})`),
   },
   (table) => [
     // HNSW-Index MIT vector_cosine_ops – nur damit nutzt der Cosine-Operator
@@ -60,5 +76,7 @@ export const chunks = pgTable(
     ),
     // Normaler Index auf documentId für Joins / kaskadierendes Löschen.
     index('chunks_document_id_idx').on(table.documentId),
+    // GIN-Index für die Volltext-/Wort-Suche auf der tsvector-Spalte.
+    index('chunks_content_search_gin_idx').using('gin', table.contentSearch),
   ],
 );
