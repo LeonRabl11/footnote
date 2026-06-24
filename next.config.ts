@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
   sassOptions: {
     loadPaths: ['./src'],
   },
+  experimental: {
+    serverActions: {
+      // Zod erlaubt 5 MB Datei; etwas höher gesetzt, da multipart/form-data
+      // zusätzliche Bytes (Boundaries, Part-Header) zum Request-Body addiert.
+      bodySizeLimit: '6mb',
+    },
+  },
 };
 
 export default withNextIntl(nextConfig);

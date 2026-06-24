@@ -3,5 +3,21 @@
     "title": "Footnote",
     "tagline": "Der Wissensassistent, der jede Antwort mit ihrer Quelle belegt.",
     "placeholder": "Platzhalter-Oberfläche – die Funktionslogik folgt in späteren Schritten."
+  },
+  "Ingest": {
+    "title": "Dokument hochladen",
+    "description": "Lade eine .md- oder .txt-Datei hoch (max. 5 MB). Sie wird eingelesen, in Stücke geschnitten und als Embeddings gespeichert.",
+    "fileLabel": "Datei (.md oder .txt)",
+    "submit": "Hochladen",
+    "submitting": "Wird hochgeladen …",
+    "created": "{count, plural, one {# Chunk gespeichert} other {# Chunks gespeichert}} – „{title}“.",
+    "exists": "„{title}“ ist bereits vorhanden ({count, plural, one {# Chunk} other {# Chunks}}).",
+    "ingestError": "Konnte das Dokument nicht verarbeiten: {message}",
+    "validation": {
+      "no-file": "Bitte eine Datei auswählen.",
+      "empty": "Die Datei ist leer.",
+      "too-large": "Die Datei ist zu groß (max. 5 MB).",
+      "bad-type": "Nur .md- oder .txt-Dateien sind erlaubt."
+    }
   }
 }

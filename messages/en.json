@@ -3,5 +3,21 @@
     "title": "Footnote",
     "tagline": "The knowledge assistant that backs every answer with its source.",
     "placeholder": "Placeholder UI – the feature logic follows in later steps."
+  },
+  "Ingest": {
+    "title": "Upload document",
+    "description": "Upload a .md or .txt file (max. 5 MB). It will be parsed, split into chunks and stored as embeddings.",
+    "fileLabel": "File (.md or .txt)",
+    "submit": "Upload",
+    "submitting": "Uploading …",
+    "created": "{count, plural, one {# chunk stored} other {# chunks stored}} – “{title}”.",
+    "exists": "“{title}” already exists ({count, plural, one {# chunk} other {# chunks}}).",
+    "ingestError": "Could not process the document: {message}",
+    "validation": {
+      "no-file": "Please select a file.",
+      "empty": "The file is empty.",
+      "too-large": "The file is too large (max. 5 MB).",
+      "bad-type": "Only .md or .txt files are allowed."
+    }
   }
 }
