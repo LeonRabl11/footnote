@@ -14,8 +14,8 @@
   },
   "Ingest": {
     "title": "Dokument hochladen",
-    "description": "Lade eine .md- oder .txt-Datei hoch (max. 5 MB). Sie wird eingelesen, in Stücke geschnitten und als Embeddings gespeichert.",
-    "fileLabel": "Datei (.md oder .txt)",
+    "description": "Lade eine .md-, .txt- oder .pdf-Datei hoch (max. 10 MB). Sie wird eingelesen, in Stücke geschnitten und als Embeddings gespeichert.",
+    "fileLabel": "Datei (.md, .txt oder .pdf)",
     "submit": "Hochladen",
     "submitting": "Wird hochgeladen …",
     "created": "{count, plural, one {# Chunk gespeichert} other {# Chunks gespeichert}} – „{title}“.",
@@ -24,8 +24,13 @@
     "validation": {
       "no-file": "Bitte eine Datei auswählen.",
       "empty": "Die Datei ist leer.",
-      "too-large": "Die Datei ist zu groß (max. 5 MB).",
-      "bad-type": "Nur .md- oder .txt-Dateien sind erlaubt."
+      "too-large": "Die Datei ist zu groß (max. 10 MB).",
+      "bad-type": "Nur .md-, .txt- oder .pdf-Dateien sind erlaubt."
+    },
+    "extractError": {
+      "empty": "Kein auslesbarer Text in der Datei.",
+      "empty-or-scanned": "Kein auslesbarer Text – möglicherweise ein gescanntes PDF ohne Textebene.",
+      "unsupported-type": "Nicht unterstützter Dateityp."
     }
   }
 }

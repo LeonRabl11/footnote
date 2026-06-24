@@ -2,21 +2,24 @@
 
 import { z } from 'zod';
 import { ingest } from './ingest';
+import type { ExtractionErrorCode } from './extract';
 
 // Hält das Limit synchron mit experimental.serverActions.bodySizeLimit in
-// next.config.ts (dort etwas höher wegen multipart-Overhead).
-const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_EXT = ['md', 'txt'] as const;
+// next.config.ts (dort etwas höher wegen multipart-Overhead). PDFs sind größer
+// als Textdateien -> 10 MB.
+const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_EXT = ['md', 'txt', 'pdf'] as const;
 
 export type ValidationCode = 'no-file' | 'empty' | 'too-large' | 'bad-type';
 
-// Typisiertes Ergebnis für useActionState. Validierungsfehler tragen einen
-// Code (in der UI über next-intl übersetzt), keine fertigen Texte.
+// Typisiertes Ergebnis für useActionState. Fehler tragen einen Code (in der UI
+// über next-intl übersetzt), keine fertigen Texte.
 export type UploadState =
   | { kind: 'idle' }
   | { kind: 'created'; chunkCount: number; title: string }
   | { kind: 'exists'; chunkCount: number; title: string }
   | { kind: 'validation'; code: ValidationCode }
+  | { kind: 'extract-error'; code: ExtractionErrorCode }
   | { kind: 'ingest-error'; message: string };
 
 function extensionOf(fileName: string): string {
@@ -57,6 +60,9 @@ export async function uploadDocument(
     case 'exists':
       return { kind: 'exists', chunkCount: result.chunkCount, title };
     case 'error':
-      return { kind: 'ingest-error', message: result.message };
+      // Bekannte (übersetzbare) Extraktionsfehler als Code, sonst Roh-Meldung.
+      return result.code
+        ? { kind: 'extract-error', code: result.code }
+        : { kind: 'ingest-error', message: result.message };
   }
 }

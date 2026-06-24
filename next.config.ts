@@ -13,11 +13,14 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      // Zod erlaubt 5 MB Datei; etwas höher gesetzt, da multipart/form-data
+      // Zod erlaubt 10 MB Datei; etwas höher gesetzt, da multipart/form-data
       // zusätzliche Bytes (Boundaries, Part-Header) zum Request-Body addiert.
-      bodySizeLimit: '6mb',
+      bodySizeLimit: '12mb',
     },
   },
+  // unpdf bringt einen gebündelten PDF.js-Build mit; als externes Server-Paket
+  // belassen, damit der Bundler ihn nicht umschreibt.
+  serverExternalPackages: ['unpdf'],
 };
 
 export default withNextIntl(nextConfig);

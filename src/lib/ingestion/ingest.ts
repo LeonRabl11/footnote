@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { documents, chunks } from '@/lib/db/schema';
 import { embedTexts } from '@/lib/embeddings/embed';
-import { extractText, ExtractionError } from './extract';
+import { extractText, ExtractionError, type ExtractionErrorCode } from './extract';
 import { chunkText } from './chunk';
 
 export type IngestInput = {
@@ -17,16 +17,17 @@ export type IngestInput = {
 export type IngestResult =
   | { status: 'created'; documentId: string; chunkCount: number }
   | { status: 'exists'; documentId: string; chunkCount: number }
-  | { status: 'error'; message: string };
+  // code (falls vorhanden) wird in der UI über next-intl übersetzt.
+  | { status: 'error'; message: string; code?: ExtractionErrorCode };
 
 export async function ingest(input: IngestInput): Promise<IngestResult> {
   // 1. Extrahieren (kann mit ExtractionError abbrechen).
   let text: string;
   try {
-    text = extractText(input.bytes, input.sourceType);
+    text = await extractText(input.bytes, input.sourceType);
   } catch (error) {
     if (error instanceof ExtractionError) {
-      return { status: 'error', message: error.message };
+      return { status: 'error', message: error.message, code: error.code };
     }
     throw error;
   }

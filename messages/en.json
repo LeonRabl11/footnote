@@ -14,8 +14,8 @@
   },
   "Ingest": {
     "title": "Upload document",
-    "description": "Upload a .md or .txt file (max. 5 MB). It will be parsed, split into chunks and stored as embeddings.",
-    "fileLabel": "File (.md or .txt)",
+    "description": "Upload a .md, .txt or .pdf file (max. 10 MB). It will be parsed, split into chunks and stored as embeddings.",
+    "fileLabel": "File (.md, .txt or .pdf)",
     "submit": "Upload",
     "submitting": "Uploading …",
     "created": "{count, plural, one {# chunk stored} other {# chunks stored}} – “{title}”.",
@@ -24,8 +24,13 @@
     "validation": {
       "no-file": "Please select a file.",
       "empty": "The file is empty.",
-      "too-large": "The file is too large (max. 5 MB).",
-      "bad-type": "Only .md or .txt files are allowed."
+      "too-large": "The file is too large (max. 10 MB).",
+      "bad-type": "Only .md, .txt or .pdf files are allowed."
+    },
+    "extractError": {
+      "empty": "No readable text in the file.",
+      "empty-or-scanned": "No readable text – possibly a scanned PDF without a text layer.",
+      "unsupported-type": "Unsupported file type."
     }
   }
 }

@@ -24,7 +24,7 @@ export default function IngestPage() {
           id="file"
           name="file"
           type="file"
-          accept=".md,.txt"
+          accept=".md,.txt,.pdf"
           required
           disabled={isPending}
           className={styles.input}
@@ -47,6 +47,11 @@ export default function IngestPage() {
       {state.kind === 'validation' && (
         <p className={styles.error} role="alert">
           {t(`validation.${state.code}`)}
+        </p>
+      )}
+      {state.kind === 'extract-error' && (
+        <p className={styles.error} role="alert">
+          {t(`extractError.${state.code}`)}
         </p>
       )}
       {state.kind === 'ingest-error' && (
