@@ -18,7 +18,7 @@
   },
   "Ingest": {
     "title": "Dokument hochladen",
-    "description": "Lade eine .md-, .txt- oder .pdf-Datei hoch (max. 10 MB). Sie wird eingelesen, in Stücke geschnitten und als Embeddings gespeichert.",
+    "description": "Lade eine .md-, .txt- oder .pdf-Datei hoch (max. 4 MB). Sie wird eingelesen, in Stücke geschnitten und als Embeddings gespeichert.",
     "fileLabel": "Datei (.md, .txt oder .pdf)",
     "submit": "Hochladen",
     "submitting": "Wird hochgeladen …",
@@ -28,7 +28,7 @@
     "validation": {
       "no-file": "Bitte eine Datei auswählen.",
       "empty": "Die Datei ist leer.",
-      "too-large": "Die Datei ist zu groß (max. 10 MB).",
+      "too-large": "Die Datei ist zu groß (max. 4 MB).",
       "bad-type": "Nur .md-, .txt- oder .pdf-Dateien sind erlaubt."
     },
     "extractError": {

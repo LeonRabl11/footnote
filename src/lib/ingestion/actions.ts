@@ -5,9 +5,10 @@ import { ingest } from './ingest';
 import type { ExtractionErrorCode } from './extract';
 
 // Hält das Limit synchron mit experimental.serverActions.bodySizeLimit in
-// next.config.ts (dort etwas höher wegen multipart-Overhead). PDFs sind größer
-// als Textdateien -> 10 MB.
-const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+// next.config.ts (dort etwas höher wegen multipart-Overhead). Auf Vercel ist der
+// Request-Body hart auf 4,5 MB begrenzt -> Datei-Limit knapp darunter (4 MB),
+// damit Nutzer eine saubere, übersetzte Meldung bekommen statt eines Plattform-413.
+const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
 const ALLOWED_EXT = ['md', 'txt', 'pdf'] as const;
 
 export type ValidationCode = 'no-file' | 'empty' | 'too-large' | 'bad-type';

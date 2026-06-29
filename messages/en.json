@@ -18,7 +18,7 @@
   },
   "Ingest": {
     "title": "Upload document",
-    "description": "Upload a .md, .txt or .pdf file (max. 10 MB). It will be parsed, split into chunks and stored as embeddings.",
+    "description": "Upload a .md, .txt or .pdf file (max. 4 MB). It will be parsed, split into chunks and stored as embeddings.",
     "fileLabel": "File (.md, .txt or .pdf)",
     "submit": "Upload",
     "submitting": "Uploading …",
@@ -28,7 +28,7 @@
     "validation": {
       "no-file": "Please select a file.",
       "empty": "The file is empty.",
-      "too-large": "The file is too large (max. 10 MB).",
+      "too-large": "The file is too large (max. 4 MB).",
       "bad-type": "Only .md, .txt or .pdf files are allowed."
     },
     "extractError": {

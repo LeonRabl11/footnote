@@ -13,9 +13,11 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      // Zod erlaubt 10 MB Datei; etwas höher gesetzt, da multipart/form-data
-      // zusätzliche Bytes (Boundaries, Part-Header) zum Request-Body addiert.
-      bodySizeLimit: '12mb',
+      // Vercel begrenzt den Request-Body hart auf 4,5 MB. Datei-Limit ist 4 MB
+      // (siehe actions.ts); hier knapp darüber, damit der multipart-Overhead
+      // (Boundaries, Part-Header) einer 4-MB-Datei noch bis zur Zod-Validierung
+      // durchkommt und der Nutzer die saubere "max. 4 MB"-Meldung sieht.
+      bodySizeLimit: '4.5mb',
     },
   },
   // unpdf bringt einen gebündelten PDF.js-Build mit; als externes Server-Paket

@@ -5,6 +5,11 @@ import type { FootnoteUIMessage } from '@/lib/retrieval/chat-message';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+// Vercel: Default-Funktionslaufzeit ist kurz. Die agentic Antwort macht mehrere
+// Modell-Aufrufe (Suche + Generierung, ggf. Modell-Fallback) und kann länger
+// dauern. 60 s liegt sicher im Hobby-Limit; höhere Werte bräuchten Fluid compute
+// (Dashboard-Einstellung, kein Code).
+export const maxDuration = 60;
 
 // Chat-Endpunkt für useChat. Agentic: das Modell entscheidet selbst, ob/wie oft
 // es die Wissensbasis durchsucht (Tool-Calling in answer()).
