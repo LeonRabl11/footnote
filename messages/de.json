@@ -16,6 +16,30 @@
     "error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",
     "quotaExhausted": "Das Tageskontingent aller Modelle ist erreicht. Bitte später erneut versuchen."
   },
+  "Workspace": {
+    "newChat": "+ Neuer Chat",
+    "chatsHeading": "Chats",
+    "noChats": "Noch keine Chats.",
+    "noChatSelected": "Wähle links einen Chat oder erstelle einen neuen.",
+    "untitledChat": "Neuer Chat",
+    "emptyTitle": "Wähle die Wissensbasis für diesen Chat",
+    "emptyHint": "Füge Dokumente hinzu, um diesen Chat zu starten.",
+    "addDocuments": "Dokumente hinzufügen"
+  },
+  "Documents": {
+    "panelTitle": "Wissensbasis",
+    "panelSubtitle": "Diese Dokumente gelten für den Chat.",
+    "remove": "Entfernen",
+    "removing": "Wird entfernt …",
+    "dialogTitle": "Dokumente hinzufügen",
+    "fromLibrary": "Aus der Bibliothek wählen",
+    "noLibraryDocs": "Keine weiteren Dokumente in der Bibliothek.",
+    "add": "Hinzufügen",
+    "adding": "Wird hinzugefügt …",
+    "uploadNew": "Neues Dokument hochladen",
+    "close": "Schließen",
+    "loading": "Wird geladen …"
+  },
   "Ingest": {
     "title": "Dokument hochladen",
     "description": "Lade eine .md-, .txt- oder .pdf-Datei hoch (max. 4 MB). Sie wird eingelesen, in Stücke geschnitten und als Embeddings gespeichert.",

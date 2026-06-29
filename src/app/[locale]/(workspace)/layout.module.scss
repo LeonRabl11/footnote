@@ -1,0 +1,26 @@
+// App-Shell: schmale Seitenleiste (leises Beiwerk) + dominanter Inhalt.
+// Der Inhalt (ChatWorkspace) teilt sich intern weiter in Mitte + optionales
+// rechtes Panel.
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  height: 100dvh;
+  background: var(--color-bg);
+}
+
+.content {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  // Mitte ist die hellere Held-Ebene.
+  background: var(--color-canvas);
+  // Weiche, schmale Trennkante zur Seitenleiste statt harter Linie.
+  border-left: 1px solid var(--color-border-soft);
+}
+
+// Bei wenig Platz die Seitenleiste verschmälern – ohne zu zerbrechen.
+@media (max-width: 60rem) {
+  .shell {
+    grid-template-columns: 13rem minmax(0, 1fr);
+  }
+}

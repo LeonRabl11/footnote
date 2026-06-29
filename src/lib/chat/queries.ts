@@ -105,6 +105,21 @@ export async function saveUserMessage(chatId: string, content: string) {
   await db.insert(messages).values({ chatId, role: 'user', content });
 }
 
+// Default-Titel der Tabelle (siehe schema.ts). Solange der Chat noch so heißt,
+// wird er beim ersten User-Beitrag aus dessen Text abgeleitet (lesbare Sidebar).
+const DEFAULT_CHAT_TITLE = 'Neuer Chat';
+
+// Titel NUR setzen, wenn er noch der Default ist (WHERE title = Default) -> ein
+// einmal abgeleiteter/[später] umbenannter Titel wird nie überschrieben.
+export async function setChatTitleIfDefault(chatId: string, rawTitle: string) {
+  const title = rawTitle.replace(/\s+/g, ' ').trim().slice(0, 60);
+  if (!title) return;
+  await db
+    .update(chats)
+    .set({ title })
+    .where(and(eq(chats.id, chatId), eq(chats.title, DEFAULT_CHAT_TITLE)));
+}
+
 // Assistenten-Antwort speichern und chats.updatedAt aktualisieren (atomar via batch).
 export async function saveAssistantMessage(
   chatId: string,

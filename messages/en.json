@@ -16,6 +16,30 @@
     "error": "Something went wrong. Please try again.",
     "quotaExhausted": "The daily quota of all models has been reached. Please try again later."
   },
+  "Workspace": {
+    "newChat": "+ New chat",
+    "chatsHeading": "Chats",
+    "noChats": "No chats yet.",
+    "noChatSelected": "Pick a chat on the left or create a new one.",
+    "untitledChat": "New chat",
+    "emptyTitle": "Choose the knowledge base for this chat",
+    "emptyHint": "Add documents to start this chat.",
+    "addDocuments": "Add documents"
+  },
+  "Documents": {
+    "panelTitle": "Knowledge base",
+    "panelSubtitle": "These documents apply to this chat.",
+    "remove": "Remove",
+    "removing": "Removing …",
+    "dialogTitle": "Add documents",
+    "fromLibrary": "Choose from the library",
+    "noLibraryDocs": "No further documents in the library.",
+    "add": "Add",
+    "adding": "Adding …",
+    "uploadNew": "Upload a new document",
+    "close": "Close",
+    "loading": "Loading …"
+  },
   "Ingest": {
     "title": "Upload document",
     "description": "Upload a .md, .txt or .pdf file (max. 4 MB). It will be parsed, split into chunks and stored as embeddings.",

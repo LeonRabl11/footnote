@@ -1,7 +1,11 @@
 import { after } from 'next/server';
 import { z } from 'zod';
 import { answer } from '@/lib/retrieval/answer';
-import { saveUserMessage, saveAssistantMessage } from '@/lib/chat/queries';
+import {
+  saveUserMessage,
+  saveAssistantMessage,
+  setChatTitleIfDefault,
+} from '@/lib/chat/queries';
 import { langfuseSpanProcessor } from '@/instrumentation';
 import type { FootnoteUIMessage } from '@/lib/retrieval/chat-message';
 
@@ -45,6 +49,9 @@ export async function POST(request: Request) {
   if (userText) {
     try {
       await saveUserMessage(chatId, userText);
+      // Lesbare Sidebar: Titel aus dem ersten User-Beitrag ableiten (greift nur,
+      // solange der Chat noch den Default-Titel trägt – siehe Query).
+      await setChatTitleIfDefault(chatId, userText);
     } catch (error) {
       console.error('[chat] Speichern der User-Nachricht fehlgeschlagen:', error);
     }

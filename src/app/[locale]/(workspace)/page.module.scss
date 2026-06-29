@@ -1,0 +1,22 @@
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-16) var(--space-6);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-size: var(--font-size-md);
+
+  // Ruhiges Editorial-Detail: kurzer Akzentstrich über dem Hinweis.
+  &::before {
+    content: '';
+    width: var(--space-8);
+    height: 2px;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+    opacity: 0.8;
+  }
+}
