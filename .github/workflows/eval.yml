@@ -1,0 +1,53 @@
+# Meilenstein 4 / Schritt 4: CI für die SUCH-Eval (Retrieval-Qualität).
+#
+# Läuft NUR die Such-Eval (`pnpm eval` → root promptfooconfig.yaml), NICHT die
+# Treue-/Antwort-Eval (evals/promptfooconfig.answer.yaml) – die verbraucht
+# Modell-Kontingent. Wir nutzen bewusst das bestehende npm-Script statt der
+# Promptfoo-Marketplace-Action: es trägt die nötige react-server-Condition
+# (NODE_OPTIONS=--conditions=react-server) und den vorhandenen Custom-Provider.
+#
+# Exit-Code-Gating: `promptfoo eval` liefert laut Doku Exit-Code 100, sobald
+# mind. ein Testfall fehlschlägt (oder die Pass-Rate unter der Schwelle liegt).
+# Non-Zero ⇒ der Step und damit der Job werden rot. Kein zusätzliches Flag nötig.
+
+name: Eval (Suche)
+
+on:
+  push:
+  workflow_dispatch: # auch manuell auslösbar (Actions-Tab → Run workflow)
+
+jobs:
+  search-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # pnpm VOR setup-node einrichten, damit dessen pnpm-Cache pnpm findet.
+      # Version exakt auf die lokale (11.2.2) gepinnt, die die committete
+      # Lockfile (lockfileVersion 9.0) erzeugt hat – verhindert "incompatible
+      # lockfile" bei --frozen-lockfile. (Kein packageManager-Feld vorhanden.)
+      - name: pnpm einrichten
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.2.2
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # aktuelle LTS
+          cache: pnpm
+
+      - name: Abhängigkeiten installieren
+        run: pnpm install --frozen-lockfile
+
+      - name: Such-Eval ausführen
+        run: pnpm eval
+        env:
+          # Such-Eval braucht NUR DB + Query-Embedding – kein OpenRouter, kein Langfuse.
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # In CI keine Telemetrie/Update-Checks (Netzwerk-Rauschen vermeiden).
+          PROMPTFOO_DISABLE_TELEMETRY: '1'
+          PROMPTFOO_DISABLE_UPDATE: '1'
+          CI: 'true'
