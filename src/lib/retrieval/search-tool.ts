@@ -14,8 +14,11 @@ const TOOL_DESCRIPTION =
  * Erzeugt das Such-Werkzeug für GENAU einen Request samt anfrage-lokalem
  * Quellen-Sammler. Jede Tool-Ausführung nutzt die bestehende Hybrid-Suche und
  * pusht ihre Quellen (dedupliziert nach documentId+page+line) in `sources`.
+ *
+ * `chatId` schränkt die Suche auf die Wissensbasis dieses Chats ein (wird an
+ * retrieve durchgereicht). Ohne chatId bleibt das globale Verhalten.
  */
-export function createSearchTool() {
+export function createSearchTool(chatId?: string) {
   const sources: AnswerSource[] = [];
   const seen = new Set<string>();
 
@@ -26,7 +29,7 @@ export function createSearchTool() {
     }),
     execute: async ({ query }) => {
       // Bestehende Hybrid-Retrieval-Funktion wiederverwenden – nicht neu bauen.
-      const hits = await retrieve(query);
+      const hits = await retrieve(query, chatId);
 
       for (const hit of hits) {
         const key = `${hit.documentId}:${hit.page}:${hit.line}`;

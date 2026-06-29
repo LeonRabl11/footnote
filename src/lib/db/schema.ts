@@ -15,8 +15,13 @@ import {
   vector,
   index,
   customType,
+  jsonb,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 import { EMBEDDING_DIMENSIONS } from '@/lib/embeddings/config';
+// Nur Typ-Import (zur Compile-Zeit entfernt) – kein Laufzeit-Zyklus, obwohl
+// answer.ts mittelbar wieder dieses Schema importiert.
+import type { AnswerSource } from '@/lib/retrieval/answer';
 
 // Postgres tsvector – von Drizzle nicht nativ unterstützt, daher als customType.
 const tsvector = customType<{ data: string }>({
@@ -78,5 +83,67 @@ export const chunks = pgTable(
     index('chunks_document_id_idx').on(table.documentId),
     // GIN-Index für die Volltext-/Wort-Suche auf der tsvector-Spalte.
     index('chunks_content_search_gin_idx').using('gin', table.contentSearch),
+  ],
+);
+
+// ============================================================================
+// Pro-Chat-Wissensbasis (Stufe 1, Backend). `documents`/`chunks` oben bleiben
+// die GLOBALE Bibliothek; ein Chat referenziert daraus eine Teilmenge über
+// `chat_documents`. Die Suche wird später pro Chat auf genau diese Teilmenge
+// eingeschränkt (retrieve(query, chatId)).
+// ============================================================================
+
+// -- chats -------------------------------------------------------------------
+// Eine Unterhaltung mit eigener Wissensbasis und eigenem Nachrichtenverlauf.
+export const chats = pgTable('chats', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull().default('Neuer Chat'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// -- chat_documents (M:N) ----------------------------------------------------
+// Verknüpft einen Chat mit Bibliotheks-Dokumenten. Zusammengesetzter
+// Primärschlüssel (chatId, documentId) = zugleich die geforderte UNIQUE-
+// Bedingung (jedes Dokument höchstens einmal pro Chat). Beide FKs kaskadieren:
+// Chat gelöscht -> Verknüpfung weg; Dokument aus der Bibliothek gelöscht ->
+// Verknüpfung weg (das Dokument selbst bleibt von anderen Chats unberührt).
+export const chatDocuments = pgTable(
+  'chat_documents',
+  {
+    chatId: uuid('chat_id')
+      .notNull()
+      .references(() => chats.id, { onDelete: 'cascade' }),
+    documentId: uuid('document_id')
+      .notNull()
+      .references(() => documents.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.chatId, table.documentId] }),
+    // Schneller Zugriff "alle Dokumente dieses Chats" (Such-Filter, Detailansicht).
+    index('chat_documents_chat_id_idx').on(table.chatId),
+  ],
+);
+
+// -- messages ----------------------------------------------------------------
+// Persistierter Nachrichtenverlauf eines Chats. `sources` hält die gesammelten
+// Quellen einer Assistenten-Antwort (gleiche Form wie messageMetadata), bei
+// User-Nachrichten null.
+export const messages = pgTable(
+  'messages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    chatId: uuid('chat_id')
+      .notNull()
+      .references(() => chats.id, { onDelete: 'cascade' }),
+    role: text('role').$type<'user' | 'assistant'>().notNull(),
+    content: text('content').notNull(),
+    sources: jsonb('sources').$type<AnswerSource[]>(), // nullable
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    // Verlauf eines Chats chronologisch laden.
+    index('messages_chat_id_idx').on(table.chatId),
   ],
 );

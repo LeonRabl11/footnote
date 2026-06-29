@@ -77,8 +77,10 @@ function isQuotaError(error: unknown): boolean {
  * Rückgabe unverändert: { result, sources }. `sources` ist eine stabile Referenz,
  * in die das Such-Werkzeug des aktiven Modells während des Laufs pusht.
  */
-export async function answer(messages: UIMessage[]) {
-  const { searchKnowledgeBase, sources } = createSearchTool();
+export async function answer(messages: UIMessage[], chatId?: string) {
+  // chatId schränkt das Such-Werkzeug auf die Wissensbasis dieses Chats ein.
+  // Telemetrie, Modell-Fallback und Quellen-Sammeln bleiben unverändert.
+  const { searchKnowledgeBase, sources } = createSearchTool(chatId);
   const modelMessages = await convertToModelMessages(messages);
 
   async function toUIMessageStreamResponse<_T extends UIMessage = UIMessage>(

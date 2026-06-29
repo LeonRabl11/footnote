@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { ingest } from './ingest';
+import { addDocumentToChat } from '@/lib/chat/queries';
 import type { ExtractionErrorCode } from './extract';
 
 // Hält das Limit synchron mit experimental.serverActions.bodySizeLimit in
@@ -37,6 +38,10 @@ const FileSchema = z
     message: 'bad-type',
   });
 
+// Optionale chatId aus dem Formular (zukünftige UI sendet sie als verstecktes
+// Feld). Ungültige/fehlende Werte werden ignoriert -> globaler Upload ohne Zuordnung.
+const ChatIdSchema = z.string().uuid();
+
 export async function uploadDocument(
   _prevState: UploadState,
   formData: FormData,
@@ -45,6 +50,9 @@ export async function uploadDocument(
   if (!parsed.success) {
     return { kind: 'validation', code: parsed.error.issues[0].message as ValidationCode };
   }
+
+  const chatIdParsed = ChatIdSchema.safeParse(formData.get('chatId'));
+  const chatId = chatIdParsed.success ? chatIdParsed.data : undefined;
 
   const file = parsed.data;
   const bytes = new Uint8Array(await file.arrayBuffer());
@@ -57,9 +65,18 @@ export async function uploadDocument(
 
   switch (result.status) {
     case 'created':
-      return { kind: 'created', chunkCount: result.chunkCount, title };
     case 'exists':
-      return { kind: 'exists', chunkCount: result.chunkCount, title };
+      // Dedup-Verhalten bleibt: gleiches Dokument wird nicht neu eingelesen.
+      // Ist eine chatId dabei, wird das (neue ODER bereits vorhandene) Dokument
+      // diesem Chat zugeordnet (idempotent über den PK von chat_documents).
+      if (chatId) {
+        await addDocumentToChat(chatId, result.documentId);
+      }
+      return {
+        kind: result.status,
+        chunkCount: result.chunkCount,
+        title,
+      };
     case 'error':
       // Bekannte (übersetzbare) Extraktionsfehler als Code, sonst Roh-Meldung.
       return result.code

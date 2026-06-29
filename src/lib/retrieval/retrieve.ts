@@ -1,7 +1,7 @@
 import 'server-only';
-import { cosineDistance, desc, eq, sql } from 'drizzle-orm';
+import { and, cosineDistance, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { chunks, documents } from '@/lib/db/schema';
+import { chunks, documents, chatDocuments } from '@/lib/db/schema';
 import { embedTexts } from '@/lib/embeddings/embed';
 
 export type RetrievalHit = {
@@ -37,36 +37,54 @@ const SELECT_FIELDS = {
 
 /**
  * Bedeutungs-Suche (Vektor). Asymmetrisch (RETRIEVAL_QUERY), ~CANDIDATES Treffer.
+ * Mit `chatId` werden NUR Chunks berücksichtigt, deren Dokument über
+ * chat_documents zu diesem Chat gehört (Join chunks -> documents -> chat_documents).
  */
-async function vectorSearch(query: string): Promise<RetrievalHit[]> {
+async function vectorSearch(query: string, chatId?: string): Promise<RetrievalHit[]> {
   // Bestehende Embedding-Funktion wiederverwenden – nur anderer taskType.
   const [queryEmbedding] = await embedTexts([query], 'RETRIEVAL_QUERY');
   const distance = cosineDistance(chunks.embedding, queryEmbedding);
 
-  return db
+  const base = db
     .select({ ...SELECT_FIELDS, similarity: sql<number>`1 - (${distance})` })
     .from(chunks)
     .innerJoin(documents, eq(chunks.documentId, documents.id))
-    // Nach ROHER Distanz aufsteigend sortieren -> Postgres nutzt den HNSW-Index.
-    .orderBy(distance)
-    .limit(CANDIDATES);
+    .$dynamic();
+
+  // Chat-Filter NUR ergänzen, wenn chatId gesetzt ist. Die Sortierung bleibt
+  // unverändert nach ROHER Distanz aufsteigend -> Postgres nutzt den HNSW-Index.
+  const scoped = chatId
+    ? base
+        .innerJoin(chatDocuments, eq(chatDocuments.documentId, documents.id))
+        .where(eq(chatDocuments.chatId, chatId))
+    : base;
+
+  return scoped.orderBy(distance).limit(CANDIDATES);
 }
 
 /**
  * Wort-Suche (Postgres-Volltext). Konfiguration 'simple' wie in der generierten
  * Spalte (sonst kein GIN-Index). websearch_to_tsquery verträgt beliebige Eingaben.
+ * Mit `chatId` analog auf die Dokumente dieses Chats eingeschränkt.
  */
-async function keywordSearch(query: string): Promise<RetrievalHit[]> {
+async function keywordSearch(query: string, chatId?: string): Promise<RetrievalHit[]> {
   const tsquery = sql`websearch_to_tsquery('simple', ${query})`;
   const rank = sql<number>`ts_rank(${chunks.contentSearch}, ${tsquery})`;
+  const matches = sql`${chunks.contentSearch} @@ ${tsquery}`;
 
-  return db
+  const base = db
     .select({ ...SELECT_FIELDS, similarity: rank })
     .from(chunks)
     .innerJoin(documents, eq(chunks.documentId, documents.id))
-    .where(sql`${chunks.contentSearch} @@ ${tsquery}`)
-    .orderBy(desc(rank))
-    .limit(CANDIDATES);
+    .$dynamic();
+
+  const scoped = chatId
+    ? base
+        .innerJoin(chatDocuments, eq(chatDocuments.documentId, documents.id))
+        .where(and(matches, eq(chatDocuments.chatId, chatId)))
+    : base.where(matches);
+
+  return scoped.orderBy(desc(rank)).limit(CANDIDATES);
 }
 
 /**
@@ -104,11 +122,20 @@ function fuse(
  * Hybrid-Suche: Vektor- und Wort-Suche parallel, dann RRF-Fusion. Rückgabe-
  * Format unverändert (answer.ts merkt nichts) – es ändert sich nur, WELCHE
  * Chunks geliefert werden.
+ *
+ * `chatId` schränkt BEIDE Teilsuchen auf die Dokumente dieses Chats ein. Hat der
+ * Chat keine Dokumente, liefern beide Suchen leer -> Fusion leer -> der agentic
+ * Loop antwortet korrekt mit "Das steht nicht in der Wissensbasis.".
+ * Ohne `chatId` (z. B. in den Evals) bleibt das bisherige globale Verhalten.
  */
-export async function retrieve(query: string, topK = 5): Promise<RetrievalHit[]> {
+export async function retrieve(
+  query: string,
+  chatId?: string,
+  topK = 5,
+): Promise<RetrievalHit[]> {
   const [vectorHits, keywordHits] = await Promise.all([
-    vectorSearch(query),
-    keywordSearch(query),
+    vectorSearch(query, chatId),
+    keywordSearch(query, chatId),
   ]);
 
   const fused = fuse(vectorHits, keywordHits, topK);
