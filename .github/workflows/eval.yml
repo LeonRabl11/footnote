@@ -42,7 +42,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Such-Eval ausführen
-        run: pnpm eval
+        run: pnpm run eval
         env:
           # Such-Eval braucht NUR DB + Query-Embedding – kein OpenRouter, kein Langfuse.
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
