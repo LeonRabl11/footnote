@@ -2,6 +2,11 @@
 # Hier explizit erlauben, was einen nativen Build braucht.
 allowBuilds:
   '@parcel/watcher': true
+  # promptfoo-Optionaldeps (Redteam/Browser/lokale Modelle) – für die
+  # reine Retrieval-Eval nicht nötig, daher kein nativer Build.
+  '@playwright/browser-chromium': false
   '@swc/core': true
   esbuild: true
+  onnxruntime-node: false
+  protobufjs: false
   sharp: true

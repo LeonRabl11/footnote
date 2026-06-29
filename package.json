@@ -12,12 +12,17 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "eval": "cross-env NODE_OPTIONS=--conditions=react-server promptfoo eval",
+    "eval:answer": "cross-env NODE_OPTIONS=--conditions=react-server promptfoo eval -c evals/promptfooconfig.answer.yaml"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.83",
     "@ai-sdk/react": "^3.0.210",
+    "@langfuse/otel": "^5.9.0",
+    "@langfuse/tracing": "^5.9.0",
     "@neondatabase/serverless": "^1.1.0",
+    "@opentelemetry/sdk-trace-node": "^2.8.0",
     "ai": "^6.0.208",
     "drizzle-orm": "^0.45.2",
     "next": "^16.2.9",
@@ -32,8 +37,10 @@
     "@types/node": "^26.0.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
+    "promptfoo": "^0.121.17",
     "sass": "^1.101.0",
     "typescript": "^6.0.3"
   }

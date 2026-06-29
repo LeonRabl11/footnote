@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+# Meilenstein 4 / Schritt 1: REINE Such-Eval (Retrieval-Qualität).
+# Misst nur die Such-Hälfte – ruft die bestehende Hybrid-retrieve() auf.
+# KEINE KI-Antwort, KEIN Richter, KEIN zweiter Anbieter (kommt in Schritt 2).
+# Start: pnpm eval   (lädt diese Datei automatisch)
+description: Footnote – Retrieval-Qualität gegen Goldsatz
+
+# Eigener Provider: gibt pro Treffer Dokumenttitel + Inhalt als String zurück.
+providers:
+  - file://evals/retrieval-provider.ts
+
+# Durchreich-Prompt: der Provider bekommt exakt die Frage.
+prompts:
+  - '{{query}}'
+
+# Goldsatz mit query, expected_source, expected_snippet.
+tests: file://evals/golden.csv
+
+# Gilt für jede Zeile: Treffer-String muss Dokumenttitel UND Passage enthalten.
+# icontains = case-insensitiver Substring-Match; Werte werden interpoliert.
+defaultTest:
+  assert:
+    - type: icontains
+      value: '{{expected_source}}'
+    - type: icontains
+      value: '{{expected_snippet}}'

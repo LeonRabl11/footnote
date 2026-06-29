@@ -19,8 +19,15 @@ const nextConfig: NextConfig = {
     },
   },
   // unpdf bringt einen gebündelten PDF.js-Build mit; als externes Server-Paket
-  // belassen, damit der Bundler ihn nicht umschreibt.
-  serverExternalPackages: ['unpdf'],
+  // belassen, damit der Bundler ihn nicht umschreibt. Die Langfuse-/OTel-Pakete
+  // (Tracing in src/instrumentation.ts) ebenfalls extern halten – das Node-OTel-
+  // SDK soll nicht vom Bundler umgeschrieben werden.
+  serverExternalPackages: [
+    'unpdf',
+    '@langfuse/otel',
+    '@langfuse/tracing',
+    '@opentelemetry/sdk-trace-node',
+  ],
 };
 
 export default withNextIntl(nextConfig);

@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+# Meilenstein 4 / Schritt 2: Treue-Eval mit LLM-as-Judge.
+# Misst die ANTWORT-Hälfte: Hält sich Footnotes Antwort treu an die Quellen?
+# Der Antwort-Provider ruft die ECHTE answer()-Pipeline auf (Gemini-Generierung).
+# Der RICHTER läuft über OpenRouter (zweiter, kostenloser Anbieter) und belastet
+# NICHT das Gemini-Kontingent.
+# Start: pnpm eval:answer
+#
+# Hinweis Pfade: Promptfoo löst file://-Pfade relativ zum VERZEICHNIS dieser
+# Config (evals/) auf – daher OHNE "evals/"-Präfix (sonst evals/evals/...).
+description: Footnote – Treue der Antworten (LLM-as-Judge)
+
+providers:
+  - file://answer-provider.ts
+
+# Durchreich-Prompt: der Provider bekommt exakt die Frage.
+prompts:
+  - '{{query}}'
+
+# Goldsatz mit query + expected_answer (inkl. themenfremder Fragen).
+tests: file://golden-answers.csv
+
+defaultTest:
+  options:
+    # RICHTER-Override für die llm-rubric-Bewertung: OpenRouter statt Gemini.
+    # Non-Reasoning-Instruct-Modell (sauberes JSON, keine <think>-Blöcke).
+    # Verfügbarkeit + ':free' gegen openrouter.ai/models bestätigt.
+    # OPENROUTER_API_KEY kommt aus der .env (vom Provider-Prozess geladen).
+    provider:
+      id: 'openrouter:meta-llama/llama-3.3-70b-instruct:free'
+      config:
+        temperature: 0
+  assert:
+    - type: llm-rubric
+      value: |
+        Du bewertest, ob sich eine Antwort treu an die Quelldokumente hält.
+        Frage: {{query}}
+        Erwartete, belegte Antwort: {{expected_answer}}
+        Die eingereichte Antwort BESTEHT, wenn sie inhaltlich zur erwarteten Antwort passt
+        und keine Fakten erfindet, die nicht durch die Dokumente gedeckt sind. Lautet die
+        erwartete Antwort 'Das steht nicht in der Wissensbasis.', muss die eingereichte
+        Antwort ebenfalls sinngemäß ablehnen und darf keine erfundene Auskunft geben.
+        Kleinere Formulierungsunterschiede sind in Ordnung; entscheidend ist die
+        inhaltliche Treue.

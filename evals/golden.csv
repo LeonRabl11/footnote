@@ -1,0 +1,13 @@
+query,expected_source,expected_snippet
+"Wer ist für die Verarbeitung personenbezogener Daten verantwortlich?",Datenschutz,TOC
+"Worauf beruht die gemeinsame Datenverarbeitung rechtlich?",Datenschutz,"Art. 26"
+"Was wird im Bewerbungsformular zum Datenschutz mitgeteilt?",Datenschutz,Bewerbungsformular
+"Hat die Jobplattform eine eigene Datenschutzerklärung?",Datenschutz,"eigene Datenschutzerklärung"
+"Wie hoch ist die Beitragsbemessungsgrenze ab 2026?",Krankenkasse,"5.812,50"
+"Wie hoch ist der monatliche Gesamtbeitrag ab Februar 2026?",Krankenkasse,"291,22"
+"Wann beginnt die freiwillige Kranken- und Pflegeversicherung?",Krankenkasse,12.01.2026
+"Wie hoch ist der kassenindividuelle Zusatzbeitrag?",Krankenkasse,"3,89"
+"Wie hoch ist der Beitragszuschlag für Kinderlose in der Pflegeversicherung?",Krankenkasse,"0,6"
+"Welcher Beitragssatz gilt für Renten und Versorgungsbezüge?",Krankenkasse,Renten
+"Wie hoch ist die Mindestbemessungsgrenze ab 2026?",Krankenkasse,"1.318,33"
+"Wer ist vom Beitragszuschlag für Kinderlose ausgenommen?",Krankenkasse,1940

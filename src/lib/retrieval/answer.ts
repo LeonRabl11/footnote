@@ -100,10 +100,18 @@ export async function answer(messages: UIMessage[]) {
         tools: { searchKnowledgeBase },
         stopWhen: stepCountIs(MAX_STEPS),
         temperature: 0.2,
-        providerOptions: {
-          // gemini-3.x "denkt" vor der Antwort; niedriges Level => streamt früher los.
-          google: { thinkingConfig: { thinkingLevel: 'low' } },
+        // Observability: Trace nach Langfuse (Span-Processor in src/instrumentation.ts).
+        // Rein additiv – ändert das Antwort-/Such-Verhalten nicht. Bei Modell-Fallback
+        // hängt der aktuelle modelId als Metadata an, damit man im Trace sieht, welches
+        // Modell tatsächlich geantwortet hat.
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: 'footnote-answer',
+          metadata: { model: modelId, attempt: i },
         },
+        // Keine modell-spezifische Thinking-Option: thinkingLevel gibt es nur bei
+        // gemini-3.x, bei 2.5-flash/-lite wirft die API 400. Jedes Modell nutzt
+        // seinen Default, damit der Fallback über alle GENERATION_MODELS funktioniert.
         onStepFinish: DEV
           ? ({ toolCalls }) => {
               for (const call of toolCalls) {
