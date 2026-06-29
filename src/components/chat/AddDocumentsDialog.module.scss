@@ -91,7 +91,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg);
@@ -103,6 +103,8 @@
 }
 
 .docTitle {
+  flex: 1;
+  min-width: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text);
   overflow: hidden;
@@ -112,6 +114,61 @@
 
 .docType {
   color: var(--color-text-muted);
+}
+
+// Aktionen pro Eintrag: Zuordnen/„Im Chat" und – klar abgesetzt – Löschen.
+.itemActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+// Hinweis, dass das Dokument bereits diesem Chat zugeordnet ist.
+.inChat {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+// Endgültig löschen: ruhiger Ghost-Icon-Button, der erst beim Hover „gefährlich"
+// wird (danger). Bewusst zurückhaltend und vom Akzent-„Hinzufügen" getrennt.
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 var(--space-2);
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+
+  &:hover:not(:disabled) {
+    color: var(--color-danger);
+    background: var(--color-danger-soft);
+    border-color: var(--color-danger);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 .uploadForm {

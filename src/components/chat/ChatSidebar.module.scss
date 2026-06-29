@@ -60,10 +60,20 @@
   gap: var(--space-1);
 }
 
+// Zeile = Chat-Link + (bei Hover/Fokus sichtbarer) Löschen-Button.
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .item,
 .itemActive {
+  flex: 1;
+  min-width: 0;
   display: block;
-  padding: var(--space-2) var(--space-3);
+  // Platz rechts, damit der Titel nicht unter den Löschen-Button läuft.
+  padding: var(--space-2) var(--space-8) var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
   text-decoration: none;
@@ -100,5 +110,48 @@
     height: 1.1em;
     border-radius: var(--radius-full);
     background: var(--color-accent);
+  }
+}
+
+// Dezenter Löschen-Button: nur bei Hover/Fokus der Zeile sichtbar, Gefahr erst
+// beim direkten Hover über den Button (danger-Farbe).
+.deleteChat {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast);
+
+  .row:hover &,
+  .row:focus-within & {
+    opacity: 1;
+  }
+
+  &:hover:not(:disabled) {
+    color: var(--color-danger);
+    background: var(--color-danger-soft);
+  }
+
+  // Für Tastaturnutzer immer sichtbar, sobald fokussiert.
+  &:focus-visible {
+    opacity: 1;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }

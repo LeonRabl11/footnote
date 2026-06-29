@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { chats, chatDocuments, messages, documents } from '@/lib/db/schema';
 import type { AnswerSource } from '@/lib/retrieval/answer';
@@ -88,7 +88,9 @@ export async function documentExists(documentId: string): Promise<boolean> {
   return Boolean(row);
 }
 
-// Alle Bibliotheks-Dokumente (global, chat-unabhängig).
+// Alle Bibliotheks-Dokumente (global, chat-unabhängig). `chatCount` = in wie
+// vielen Chats das Dokument zugeordnet ist (für die Warnung beim endgültigen
+// Löschen). LEFT JOIN, damit auch ungenutzte Dokumente (count 0) erscheinen.
 export async function listDocuments() {
   return db
     .select({
@@ -96,9 +98,24 @@ export async function listDocuments() {
       title: documents.title,
       sourceType: documents.sourceType,
       createdAt: documents.createdAt,
+      chatCount: sql<number>`cast(count(${chatDocuments.chatId}) as int)`,
     })
     .from(documents)
+    .leftJoin(chatDocuments, eq(chatDocuments.documentId, documents.id))
+    .groupBy(documents.id) // PK -> die übrigen documents-Spalten sind erlaubt
     .orderBy(desc(documents.createdAt));
+}
+
+// Dokument ENDGÜLTIG aus der Bibliothek löschen. Ein DELETE auf documents reicht:
+// ON DELETE CASCADE entfernt automatisch die zugehörigen chunks UND alle
+// chat_documents-Zuordnungen überall (siehe FKs in schema.ts). Das Dokument
+// verschwindet damit aus jedem Chat, der es als Kontext nutzte.
+export async function deleteDocument(id: string): Promise<boolean> {
+  const deleted = await db
+    .delete(documents)
+    .where(eq(documents.id, id))
+    .returning({ id: documents.id });
+  return deleted.length > 0;
 }
 
 export async function saveUserMessage(chatId: string, content: string) {

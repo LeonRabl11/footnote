@@ -24,7 +24,9 @@
     "untitledChat": "Neuer Chat",
     "emptyTitle": "Wähle die Wissensbasis für diesen Chat",
     "emptyHint": "Füge Dokumente hinzu, um diesen Chat zu starten.",
-    "addDocuments": "Dokumente hinzufügen"
+    "addDocuments": "Dokumente hinzufügen",
+    "deleteChat": "Chat löschen",
+    "confirmDeleteChat": "Diesen Chat löschen?"
   },
   "Documents": {
     "panelTitle": "Wissensbasis",
@@ -33,9 +35,14 @@
     "removing": "Wird entfernt …",
     "dialogTitle": "Dokumente hinzufügen",
     "fromLibrary": "Aus der Bibliothek wählen",
-    "noLibraryDocs": "Keine weiteren Dokumente in der Bibliothek.",
+    "noLibraryDocs": "Keine Dokumente in der Bibliothek.",
     "add": "Hinzufügen",
     "adding": "Wird hinzugefügt …",
+    "inChat": "Im Chat",
+    "deleteForever": "Endgültig löschen",
+    "deleting": "Wird gelöscht …",
+    "confirmDeleteDoc": "„{title}“ endgültig aus der Bibliothek löschen? Auch die zugehörigen Textstücke werden entfernt. Das kann nicht rückgängig gemacht werden.",
+    "confirmDeleteDocUsed": "„{title}“ wird in {count, plural, one {# Chat} other {# Chats}} verwendet und dort ebenfalls entfernt. Endgültig aus der Bibliothek löschen? Auch die Textstücke werden gelöscht – das kann nicht rückgängig gemacht werden.",
     "uploadNew": "Neues Dokument hochladen",
     "close": "Schließen",
     "loading": "Wird geladen …"

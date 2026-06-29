@@ -10,6 +10,8 @@ type LibraryDocument = {
   title: string;
   sourceType: string;
   createdAt: string;
+  // In wie vielen Chats das Dokument zugeordnet ist (für die Lösch-Warnung).
+  chatCount: number;
 };
 
 type Props = {
@@ -38,6 +40,7 @@ export default function AddDocumentsDialog({
   const [library, setLibrary] = useState<LibraryDocument[]>([]);
   const [loading, setLoading] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [uploadState, uploadAction, uploadPending] = useActionState(
     uploadDocument,
@@ -75,6 +78,7 @@ export default function AddDocumentsDialog({
     }
   }, [uploadState, onChanged, loadLibrary]);
 
+  // Dokument diesem Chat ZUORDNEN (nicht-destruktiv).
   async function addFromLibrary(documentId: string) {
     setAddingId(documentId);
     try {
@@ -89,8 +93,26 @@ export default function AddDocumentsDialog({
     }
   }
 
-  // Nur Bibliotheks-Dokumente anbieten, die noch nicht im Chat sind.
-  const available = library.filter((doc) => !currentDocumentIds.includes(doc.id));
+  // Dokument ENDGÜLTIG aus der Bibliothek löschen (destruktiv, überall). Deutliche
+  // Sicherheitsabfrage; nutzt der Chat(s) das Dokument, weist die Abfrage darauf hin.
+  async function deleteFromLibrary(doc: LibraryDocument) {
+    const message =
+      doc.chatCount > 0
+        ? t('confirmDeleteDocUsed', { title: doc.title, count: doc.chatCount })
+        : t('confirmDeleteDoc', { title: doc.title });
+    if (!window.confirm(message)) return;
+
+    setDeletingId(doc.id);
+    try {
+      const res = await fetch(`/api/documents/${doc.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        await loadLibrary(); // aus der Dialog-Liste entfernen
+        onChanged(); // war es im aktuellen Chat -> Panel/Leer-Zustand aktualisieren
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <dialog ref={dialogRef} className={styles.dialog} onClose={onClose}>
@@ -102,31 +124,68 @@ export default function AddDocumentsDialog({
           </button>
         </header>
 
-        {/* (a) Aus der Bibliothek wählen */}
+        {/* (a) Aus der Bibliothek wählen / endgültig löschen */}
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>{t('fromLibrary')}</h3>
           {loading ? (
             <p className={styles.muted}>{t('loading')}</p>
-          ) : available.length === 0 ? (
+          ) : library.length === 0 ? (
             <p className={styles.muted}>{t('noLibraryDocs')}</p>
           ) : (
             <ul className={styles.libraryList}>
-              {available.map((doc) => (
-                <li key={doc.id} className={styles.libraryItem}>
-                  <span className={styles.docTitle}>
-                    {doc.title}
-                    <span className={styles.docType}> · {doc.sourceType}</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => addFromLibrary(doc.id)}
-                    disabled={addingId === doc.id}
-                    className={styles.addButton}
-                  >
-                    {addingId === doc.id ? t('adding') : t('add')}
-                  </button>
-                </li>
-              ))}
+              {library.map((doc) => {
+                const inChat = currentDocumentIds.includes(doc.id);
+                return (
+                  <li key={doc.id} className={styles.libraryItem}>
+                    <span className={styles.docTitle}>
+                      {doc.title}
+                      <span className={styles.docType}> · {doc.sourceType}</span>
+                    </span>
+                    <div className={styles.itemActions}>
+                      {/* ZUORDNEN (oder Hinweis, dass schon im Chat) */}
+                      {inChat ? (
+                        <span className={styles.inChat}>{t('inChat')}</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => addFromLibrary(doc.id)}
+                          disabled={addingId === doc.id}
+                          className={styles.addButton}
+                        >
+                          {addingId === doc.id ? t('adding') : t('add')}
+                        </button>
+                      )}
+                      {/* ENDGÜLTIG LÖSCHEN – klar abgesetzt, dezent-gefährlich */}
+                      <button
+                        type="button"
+                        onClick={() => deleteFromLibrary(doc)}
+                        disabled={deletingId === doc.id}
+                        className={styles.deleteButton}
+                        title={t('deleteForever')}
+                        aria-label={t('deleteForever')}
+                      >
+                        {deletingId === doc.id ? (
+                          t('deleting')
+                        ) : (
+                          <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M3 6h18M8 6V4h8v2m-9 0v14a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6M10 11v6M14 11v6" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
