@@ -6,6 +6,7 @@ If the answer isn't in the knowledge base, Footnote says so instead of guessing.
 
 **🔗 [Live demo](https://footnote-rust.vercel.app/de)**
 
+
 <!--
   SCREENSHOTS — add two images under a top-level `docs/` folder:
   • docs/answer.png  → a grounded answer in the chat UI, with its "Sources" (file · page · line) visible.
