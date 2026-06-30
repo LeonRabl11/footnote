@@ -1,11 +1,19 @@
-// App-Shell: schmale Seitenleiste (leises Beiwerk) + dominanter Inhalt.
-// Der Inhalt (ChatWorkspace) teilt sich intern weiter in Mitte + optionales
-// rechtes Panel.
-.shell {
-  display: grid;
-  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+// Vertikaler Stapel: Kopfzeile (feste Höhe) + Arbeitsfläche (füllt den Rest).
+.app {
+  display: flex;
+  flex-direction: column;
   height: 100dvh;
   background: var(--color-bg);
+}
+
+// App-Shell: schmale Seitenleiste (leises Beiwerk) + dominanter Inhalt.
+// flex:1 + min-height:0 -> die drei Bereiche scrollen unabhängig im Restraum
+// unter der Kopfzeile; nichts wird abgeschnitten.
+.shell {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
 }
 
 .content {

@@ -16,6 +16,9 @@
     "error": "Something went wrong. Please try again.",
     "quotaExhausted": "The daily quota of all models has been reached. Please try again later."
   },
+  "Header": {
+    "home": "Footnote – go to home"
+  },
   "Workspace": {
     "newChat": "+ New chat",
     "chatsHeading": "Chats",

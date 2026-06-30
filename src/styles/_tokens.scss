@@ -104,6 +104,7 @@
   --focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent-ring);
 
   // -- Layout-Maße ----------------------------------------------------------
+  --header-height: 3.25rem; // schlanke, ruhige Kopfzeile
   --sidebar-width: 16rem;
   --panel-width: 19rem;
   --reading-width: 46rem; // lesbare Spalte für das Gespräch

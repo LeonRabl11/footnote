@@ -1,0 +1,42 @@
+.header {
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  flex-shrink: 0;
+  padding: 0 var(--space-5);
+  background: var(--color-bg);
+  // Feine Trennung zur Arbeitsfläche – dezent, nicht dominant.
+  border-bottom: 1px solid var(--color-border);
+}
+
+// Typografisches Logo: Marke + Schriftzug, ruhig, primär-textfarben.
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+
+  &:hover {
+    color: var(--color-text);
+    opacity: 0.85;
+  }
+}
+
+.mark {
+  display: block;
+  flex-shrink: 0;
+}
+
+// Die hochgestellte Fußnoten-Referenz – der einzige Akzent im Logo (sparsam).
+.markDot {
+  fill: var(--color-accent);
+}
+
+.wordmark {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+}

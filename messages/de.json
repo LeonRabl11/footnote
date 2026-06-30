@@ -16,6 +16,9 @@
     "error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",
     "quotaExhausted": "Das Tageskontingent aller Modelle ist erreicht. Bitte später erneut versuchen."
   },
+  "Header": {
+    "home": "Footnote – zur Startseite"
+  },
   "Workspace": {
     "newChat": "+ Neuer Chat",
     "chatsHeading": "Chats",
