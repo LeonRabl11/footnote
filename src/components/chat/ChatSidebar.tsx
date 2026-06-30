@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { CHATS_CHANGED_EVENT, emitChatsChanged } from '@/lib/chat/events';
+import { useWorkspaceUI } from './WorkspaceUIContext';
 import styles from './ChatSidebar.module.scss';
 
 type ChatListItem = { id: string; title: string; updatedAt: string };
@@ -17,6 +18,11 @@ export default function ChatSidebar() {
   const router = useRouter();
   const params = useParams<{ chatId?: string }>();
   const activeChatId = params?.chatId;
+
+  // Auf Handy ist die Liste eine Schublade; <= 640px steuert dieser Zustand das
+  // Ein-/Ausfahren. Auf größeren Schirmen ist die Liste fest sichtbar (CSS).
+  const { overlay, closeOverlay } = useWorkspaceUI();
+  const drawerOpen = overlay === 'sidebar';
 
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [creating, setCreating] = useState(false);
@@ -41,6 +47,7 @@ export default function ChatSidebar() {
       if (!res.ok) return;
       const { id } = (await res.json()) as { id: string };
       emitChatsChanged(); // Liste aktualisieren
+      closeOverlay(); // auf Handy die Schublade schließen
       router.push(`/c/${id}`); // direkt in den neuen Chat wechseln
     } finally {
       setCreating(false);
@@ -68,15 +75,53 @@ export default function ChatSidebar() {
   }
 
   return (
-    <nav className={styles.sidebar} aria-label={t('chatsHeading')}>
-      <button
-        type="button"
-        onClick={handleNewChat}
-        disabled={creating}
-        className={styles.newChat}
+    <>
+      {/* Abgedunkelter Hintergrund hinter der Schublade (nur Handy). Tap schließt. */}
+      {drawerOpen && (
+        <div
+          className={styles.backdrop}
+          onClick={closeOverlay}
+          aria-hidden="true"
+        />
+      )}
+
+      <nav
+        className={`${styles.sidebar}${drawerOpen ? ` ${styles.sidebarOpen}` : ''}`}
+        aria-label={t('chatsHeading')}
       >
-        {t('newChat')}
-      </button>
+        {/* Schublade-Kopf: nur auf dem Handy sichtbar (Schließen-X). */}
+        <div className={styles.drawerHeader}>
+          <span className={styles.drawerTitle}>{t('chatsHeading')}</span>
+          <button
+            type="button"
+            onClick={closeOverlay}
+            className={styles.drawerClose}
+            aria-label={t('closeChats')}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleNewChat}
+          disabled={creating}
+          className={styles.newChat}
+        >
+          {t('newChat')}
+        </button>
 
       {chats.length === 0 ? (
         <p className={styles.empty}>{t('noChats')}</p>
@@ -90,6 +135,7 @@ export default function ChatSidebar() {
                   href={`/c/${chat.id}`}
                   className={isActive ? styles.itemActive : styles.item}
                   aria-current={isActive ? 'page' : undefined}
+                  onClick={closeOverlay}
                 >
                   {chat.title}
                 </Link>
@@ -117,9 +163,10 @@ export default function ChatSidebar() {
                 </button>
               </li>
             );
-          })}
-        </ul>
-      )}
-    </nav>
+            })}
+          </ul>
+        )}
+      </nav>
+    </>
   );
 }

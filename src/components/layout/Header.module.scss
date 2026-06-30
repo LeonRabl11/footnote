@@ -1,12 +1,43 @@
 .header {
   display: flex;
   align-items: center;
+  gap: var(--space-2);
   height: var(--header-height);
   flex-shrink: 0;
-  padding: 0 var(--space-5);
+  // Auf dem Handy etwas knapper, sonst wie gehabt.
+  padding: 0 clamp(var(--space-3), 3vw, var(--space-5));
   background: var(--color-bg);
   // Feine Trennung zur Arbeitsfläche – dezent, nicht dominant.
   border-bottom: 1px solid var(--color-border);
+}
+
+// Hamburger: nur auf dem Handy sichtbar (darunter wird die Liste zur Schublade).
+.menuToggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  margin-left: calc(-1 * var(--space-2)); // optischer Ausgleich zum Icon-Rand
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+
+  &:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+  }
+}
+
+@media (max-width: 40rem) {
+  .menuToggle {
+    display: inline-flex;
+  }
 }
 
 // Typografisches Logo: Marke + Schriftzug, ruhig, primär-textfarben.

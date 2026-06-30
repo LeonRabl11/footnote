@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import type { FootnoteUIMessage } from '@/lib/retrieval/chat-message';
 import { emitChatsChanged } from '@/lib/chat/events';
 import AddDocumentsDialog from './AddDocumentsDialog';
+import { useWorkspaceUI } from './WorkspaceUIContext';
 import styles from './ChatWorkspace.module.scss';
 
 export type ChatDocument = { id: string; title: string; sourceType: string };
@@ -47,8 +48,20 @@ export default function ChatWorkspace({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
+  // Auf Tablet/Handy (< 1024px) ist das Kontext-Panel ein Slide-over; dieser
+  // Zustand steuert das Ein-/Ausfahren. Auf Desktop liegt es fest daneben (CSS).
+  const { overlay, togglePanel, closeOverlay } = useWorkspaceUI();
+  const panelOpen = overlay === 'panel';
+
   const isBusy = status === 'submitted' || status === 'streaming';
   const hasDocs = documents.length > 0;
+
+  // Dialog öffnen = anderes Overlay; das Slide-over-Panel vorher schließen,
+  // damit immer nur EIN Overlay sichtbar ist.
+  function openDialog() {
+    closeOverlay();
+    setDialogOpen(true);
+  }
 
   // Doku-Liste des Chats neu laden (nach Hinzufügen/Hochladen/Entfernen). Nutzt
   // GET /api/chats/[id] und übernimmt NUR die Dokumente (Nachrichten verwaltet useChat).
@@ -95,6 +108,20 @@ export default function ChatWorkspace({
     <div className={hasDocs ? styles.layoutWithPanel : styles.layout}>
       {/* MITTE */}
       <section className={styles.chatColumn}>
+        {/* Nur < 1024px: öffnet das Kontext-Panel als Slide-over. Klebt oben. */}
+        {hasDocs && (
+          <div className={styles.mobileBar}>
+            <button
+              type="button"
+              onClick={togglePanel}
+              className={styles.panelToggle}
+              aria-expanded={panelOpen}
+            >
+              {td('panelToggle', { count: documents.length })}
+            </button>
+          </div>
+        )}
+
         {hasDocs ? (
           <div className={styles.messages}>
             {messages.length === 0 && <p className={styles.empty}>{t('empty')}</p>}
@@ -170,7 +197,7 @@ export default function ChatWorkspace({
             <p className={styles.emptyStateHint}>{tw('emptyHint')}</p>
             <button
               type="button"
-              onClick={() => setDialogOpen(true)}
+              onClick={openDialog}
               className={styles.primaryButton}
             >
               {tw('addDocuments')}
@@ -204,11 +231,46 @@ export default function ChatWorkspace({
         </form>
       </section>
 
-      {/* RECHTS: Kontext-Panel – nur wenn der Chat Dokumente hat. */}
+      {/* Abgedunkelter Hintergrund hinter dem Slide-over (nur < 1024px). */}
+      {hasDocs && panelOpen && (
+        <div
+          className={styles.backdrop}
+          onClick={closeOverlay}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* RECHTS: Kontext-Panel – nur wenn der Chat Dokumente hat. Auf Desktop
+          fest daneben, darunter als einfahrendes Slide-over. */}
       {hasDocs && (
-        <aside className={styles.contextColumn} aria-label={td('panelTitle')}>
+        <aside
+          className={`${styles.contextColumn}${panelOpen ? ` ${styles.contextColumnOpen}` : ''}`}
+          aria-label={td('panelTitle')}
+        >
           <header className={styles.panelHeader}>
-            <h2 className={styles.panelTitle}>{td('panelTitle')}</h2>
+            <div className={styles.panelHeaderTop}>
+              <h2 className={styles.panelTitle}>{td('panelTitle')}</h2>
+              <button
+                type="button"
+                onClick={closeOverlay}
+                className={styles.panelClose}
+                aria-label={td('close')}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             <p className={styles.panelSubtitle}>{td('panelSubtitle')}</p>
           </header>
 
@@ -233,7 +295,7 @@ export default function ChatWorkspace({
 
           <button
             type="button"
-            onClick={() => setDialogOpen(true)}
+            onClick={openDialog}
             className={styles.secondaryButton}
           >
             {tw('addDocuments')}

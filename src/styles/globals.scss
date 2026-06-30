@@ -24,6 +24,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  // Off-canvas-Overlays (Schublade/Slide-over) liegen außerhalb des Viewports
+  // -> kein horizontaler Scrollbalken/Überlauf bei keiner Breite.
+  overflow-x: clip;
 }
 
 a {

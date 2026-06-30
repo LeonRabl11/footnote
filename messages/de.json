@@ -17,7 +17,9 @@
     "quotaExhausted": "Das Tageskontingent aller Modelle ist erreicht. Bitte später erneut versuchen."
   },
   "Header": {
-    "home": "Footnote – zur Startseite"
+    "home": "Footnote – zur Startseite",
+    "menu": "Chats öffnen",
+    "closeMenu": "Chats schließen"
   },
   "Workspace": {
     "newChat": "+ Neuer Chat",
@@ -29,11 +31,13 @@
     "emptyHint": "Füge Dokumente hinzu, um diesen Chat zu starten.",
     "addDocuments": "Dokumente hinzufügen",
     "deleteChat": "Chat löschen",
-    "confirmDeleteChat": "Diesen Chat löschen?"
+    "confirmDeleteChat": "Diesen Chat löschen?",
+    "closeChats": "Chats schließen"
   },
   "Documents": {
     "panelTitle": "Wissensbasis",
     "panelSubtitle": "Diese Dokumente gelten für den Chat.",
+    "panelToggle": "Dokumente ({count})",
     "remove": "Entfernen",
     "removing": "Wird entfernt …",
     "dialogTitle": "Dokumente hinzufügen",

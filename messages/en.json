@@ -17,7 +17,9 @@
     "quotaExhausted": "The daily quota of all models has been reached. Please try again later."
   },
   "Header": {
-    "home": "Footnote – go to home"
+    "home": "Footnote – go to home",
+    "menu": "Open chats",
+    "closeMenu": "Close chats"
   },
   "Workspace": {
     "newChat": "+ New chat",
@@ -29,11 +31,13 @@
     "emptyHint": "Add documents to start this chat.",
     "addDocuments": "Add documents",
     "deleteChat": "Delete chat",
-    "confirmDeleteChat": "Delete this chat?"
+    "confirmDeleteChat": "Delete this chat?",
+    "closeChats": "Close chats"
   },
   "Documents": {
     "panelTitle": "Knowledge base",
     "panelSubtitle": "These documents apply to this chat.",
+    "panelToggle": "Documents ({count})",
     "remove": "Remove",
     "removing": "Removing …",
     "dialogTitle": "Add documents",

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { setRequestLocale } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import ChatSidebar from '@/components/chat/ChatSidebar';
+import { WorkspaceUIProvider } from '@/components/chat/WorkspaceUIContext';
 import styles from './layout.module.scss';
 
 type Props = {
@@ -18,13 +19,17 @@ export default async function WorkspaceLayout({ children, params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
+  // Provider hält nur den reinen Overlay-UI-Zustand (Schublade/Slide-over). Die
+  // Server-Komponenten (Header) werden als children durchgereicht – erlaubt.
   return (
-    <div className={styles.app}>
-      <Header />
-      <div className={styles.shell}>
-        <ChatSidebar />
-        <main className={styles.content}>{children}</main>
+    <WorkspaceUIProvider>
+      <div className={styles.app}>
+        <Header />
+        <div className={styles.shell}>
+          <ChatSidebar />
+          <main className={styles.content}>{children}</main>
+        </div>
       </div>
-    </div>
+    </WorkspaceUIProvider>
   );
 }

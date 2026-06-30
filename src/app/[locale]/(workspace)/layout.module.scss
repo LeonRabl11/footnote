@@ -1,8 +1,12 @@
 // Vertikaler Stapel: Kopfzeile (feste Höhe) + Arbeitsfläche (füllt den Rest).
+// 100dvh statt 100vh: auf Mobilbrowsern springt das Layout nicht, wenn die
+// Adressleiste ein-/ausblendet. overflow:hidden hält die Schale ruhig –
+// gescrollt wird nur INNERHALB der einzelnen Bereiche.
 .app {
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  overflow: hidden;
   background: var(--color-bg);
 }
 
@@ -10,6 +14,7 @@
 // flex:1 + min-height:0 -> die drei Bereiche scrollen unabhängig im Restraum
 // unter der Kopfzeile; nichts wird abgeschnitten.
 .shell {
+  position: relative; // Bezug für die einfahrende Schublade (<= 640px)
   flex: 1;
   min-height: 0;
   display: grid;
@@ -26,9 +31,23 @@
   border-left: 1px solid var(--color-border-soft);
 }
 
-// Bei wenig Platz die Seitenleiste verschmälern – ohne zu zerbrechen.
-@media (max-width: 60rem) {
+// TABLET (640–1024px): Platz wird knapper -> Liste schmaler, bleibt aber
+// sichtbar (häufige Navigation). Das Kontext-Panel wandert in ChatWorkspace
+// in ein Slide-over.
+@media (max-width: 64rem) {
   .shell {
     grid-template-columns: 13rem minmax(0, 1fr);
+  }
+}
+
+// HANDY (< 640px): einspaltig. Das Gespräch nimmt die volle Breite; die
+// Chat-Liste wird zur einfahrenden Schublade (Styles in ChatSidebar).
+@media (max-width: 40rem) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .content {
+    border-left: none;
   }
 }

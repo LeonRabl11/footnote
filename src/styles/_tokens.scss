@@ -109,4 +109,19 @@
   --panel-width: 19rem;
   --reading-width: 46rem; // lesbare Spalte für das Gespräch
   --content-max-width: 48rem;
+
+  // Mobile/Tablet: die Chat-Liste fährt als Schublade ein, das Kontext-Panel
+  // als Slide-over. Breiten gedeckelt, damit auf schmalen Schirmen noch ein
+  // Streifen Hintergrund (zum Schließen per Tap) sichtbar bleibt.
+  --drawer-width: min(18rem, 84vw);
+  --slideover-width: min(21rem, 88vw);
+
+  // Mindesthöhe für Touch-Ziele (Daumen-freundlich).
+  --touch-target: 2.75rem; // 44px
+
+  // -- Ebenen-Stapelung (z-index) ------------------------------------------
+  // Overlays liegen unter der Kopfzeile, aber über der Arbeitsfläche; der
+  // abgedunkelte Hintergrund knapp darunter.
+  --z-backdrop: 40;
+  --z-drawer: 50;
 }

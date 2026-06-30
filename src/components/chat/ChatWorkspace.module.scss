@@ -14,6 +14,64 @@
   grid-template-columns: minmax(0, 1fr) var(--panel-width);
 }
 
+// Abgedunkelter Hintergrund hinter dem Slide-over-Panel (nur < 1024px). Liegt
+// unter der Kopfzeile, damit diese bedienbar bleibt. Ab 1024px liegt das Panel
+// fest daneben -> kein Backdrop.
+.backdrop {
+  position: fixed;
+  inset: var(--header-height) 0 0 0;
+  z-index: var(--z-backdrop);
+  background: var(--color-overlay);
+  backdrop-filter: blur(2px);
+  border: none;
+}
+
+@media (min-width: 64rem) {
+  .backdrop {
+    display: none;
+  }
+}
+
+// Schmaler, oben klebender Streifen mit dem „Dokumente (N)"-Knopf, der das
+// Kontext-Panel als Slide-over öffnet. Erst < 1024px sichtbar (Desktop: Panel
+// liegt fest daneben). Teilt die lesbare Spaltenbreite der Mitte.
+.mobileBar {
+  display: none;
+  width: 100%;
+  max-width: var(--reading-width);
+  justify-content: flex-end;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-bottom: var(--space-3);
+  // Inhalt scrollt sauber hinter dem Streifen weg.
+  background: linear-gradient(to bottom, var(--color-canvas) 70%, transparent);
+}
+
+.panelToggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  gap: var(--space-2);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+
+  &:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-strong);
+  }
+}
+
 // ----------------------------------------------------------------------------
 // MITTE – der Held. Lesbare, zentrierte Spalte, großzügige Polsterung.
 // ----------------------------------------------------------------------------
@@ -73,7 +131,8 @@
 
 .emptyStateTitle {
   margin: 0;
-  font-size: var(--font-size-xl);
+  // Sanft skalieren: auf schmalen Schirmen kleiner, zur lg-Stufe herunter.
+  font-size: clamp(var(--font-size-lg), 5vw, var(--font-size-xl));
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-tight);
   max-width: 24ch;
@@ -262,7 +321,8 @@
   gap: var(--space-3);
   position: sticky;
   bottom: 0;
-  padding: var(--space-4) 0 var(--space-2);
+  // Notch/Home-Indicator unten respektieren (iPhone), sonst wie gehabt.
+  padding: var(--space-4) 0 max(var(--space-2), env(safe-area-inset-bottom));
   // Sanftes Ausblenden des scrollenden Inhalts hinter der Eingabe.
   background: linear-gradient(
     to top,
@@ -384,6 +444,36 @@
   gap: var(--space-1);
 }
 
+// Titelzeile + (nur < 1024px) Schließen-X für das Slide-over.
+.panelHeaderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.panelClose {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+
+  &:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+  }
+}
+
 .panelTitle {
   margin: 0;
   font-size: var(--font-size-xs);
@@ -464,20 +554,83 @@
 }
 
 // ----------------------------------------------------------------------------
-// Responsiv: bei wenig Platz klappt das rechte Panel unter die Mitte (kein JS,
-// alles bleibt erreichbar). Volles Mobile-Layout ist nicht das Ziel.
+// TABLET + HANDY (< 1024px): das Gespräch füllt die Breite, das Kontext-Panel
+// wird ein von rechts einfahrendes Slide-over (Toggle „Dokumente (N)"). So
+// bleibt die Mitte der Held und alles erreichbar.
 // ----------------------------------------------------------------------------
-@media (max-width: 52rem) {
+@media (max-width: 64rem) {
   .layoutWithPanel {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .contextColumn {
-    border-left: none;
-    border-top: 1px solid var(--color-border);
+  .mobileBar {
+    display: flex;
   }
 
+  .panelClose {
+    display: inline-flex;
+  }
+
+  .contextColumn {
+    position: fixed;
+    top: var(--header-height);
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-drawer);
+    width: var(--slideover-width);
+    border-left: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);
+    transition: transform var(--transition-base) var(--ease-out);
+    // Notch/Home-Indicator unten respektieren.
+    padding-bottom: max(var(--space-6), env(safe-area-inset-bottom));
+  }
+
+  .contextColumnOpen {
+    transform: none;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// HANDY (< 640px): volle Breite mit angenehmem Innenabstand, fluide Abstände,
+// daumengerechte Eingabeleiste.
+// ----------------------------------------------------------------------------
+@media (max-width: 40rem) {
   .chatColumn {
-    padding: var(--space-6) var(--space-5) var(--space-4);
+    gap: var(--space-5);
+    padding: var(--space-4) var(--space-4) var(--space-2);
+  }
+
+  .messages {
+    gap: var(--space-6);
+  }
+
+  // User-Blase darf etwas breiter werden (wenig Platz).
+  .user {
+    max-width: 92%;
+  }
+
+  .input,
+  .button {
+    min-height: var(--touch-target);
+  }
+
+  .emptyState {
+    padding: var(--space-12) var(--space-2);
+  }
+}
+
+// Touch: das stets sichtbare Entfernen ist im Panel schon ein Textknopf –
+// hier nur die Mindesthöhe daumengerecht anheben.
+@media (hover: none) {
+  .removeButton {
+    min-height: var(--touch-target);
+  }
+}
+
+// Bewegung respektieren: kein Einfahr-Slide.
+@media (prefers-reduced-motion: reduce) {
+  .contextColumn {
+    transition: none;
   }
 }

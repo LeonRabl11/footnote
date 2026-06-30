@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import MenuToggle from './MenuToggle';
 import styles from './Header.module.scss';
 
 // Schlanke, ruhige Kopfzeile über dem Drei-Bereiche-Layout. Reine Optik – keine
@@ -9,6 +10,8 @@ export default async function Header() {
 
   return (
     <header className={styles.header}>
+      {/* Nur auf dem Handy: öffnet die Chat-Listen-Schublade. */}
+      <MenuToggle />
       {/* Klick aufs Logo -> Startseite (leerer Workspace) unter [locale]. */}
       <Link href="/" className={styles.logo} aria-label={t('home')}>
         {/* Signatur-Marke (rein per SVG): ein paar „Textzeilen“ mit einer

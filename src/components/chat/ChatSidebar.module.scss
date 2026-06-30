@@ -10,6 +10,62 @@
   background: var(--color-bg);
 }
 
+// Schublade-Kopf (Titel + Schließen-X): erst auf dem Handy sichtbar.
+.drawerHeader {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawerTitle {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.drawerClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  margin-right: calc(-1 * var(--space-2));
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+
+  &:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+  }
+}
+
+// Abgedunkelter Hintergrund hinter der Schublade. Liegt unter der Kopfzeile,
+// damit Logo/Hamburger erreichbar bleiben. NUR auf dem Handy aktiv – ab 640px
+// ist die Liste fest sichtbar, ein evtl. „offener" Zustand darf nichts abdunkeln.
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: var(--header-height) 0 0 0;
+  z-index: var(--z-backdrop);
+  background: var(--color-overlay);
+  backdrop-filter: blur(2px);
+  border: none;
+}
+
+@media (max-width: 40rem) {
+  .backdrop {
+    display: block;
+  }
+}
+
 // „+ Neuer Chat“ – ruhig, nicht der laute Held. Akzent erscheint erst beim Hover.
 .newChat {
   display: flex;
@@ -153,5 +209,67 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Touch: ohne Hover gibt es keinen „bei Hover einblenden"-Trick -> das
+// Löschen-Icon bleibt dauerhaft sichtbar, und die Ziele werden daumengerecht.
+// ----------------------------------------------------------------------------
+@media (hover: none) {
+  .deleteChat {
+    opacity: 1;
+    min-width: var(--touch-target);
+    height: var(--touch-target);
+  }
+
+  .item,
+  .itemActive {
+    min-height: var(--touch-target);
+    display: flex;
+    align-items: center;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// HANDY (< 640px): die Liste fährt als Schublade von links ein. Fixiert unter
+// der Kopfzeile, standardmäßig ausgeblendet; `sidebarOpen` schiebt sie herein.
+// ----------------------------------------------------------------------------
+@media (max-width: 40rem) {
+  .sidebar {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    bottom: 0;
+    z-index: var(--z-drawer);
+    width: var(--drawer-width);
+    border-right: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(-100%);
+    transition: transform var(--transition-base) var(--ease-out);
+    // Notch/Home-Indicator unten respektieren.
+    padding-bottom: max(var(--space-5), env(safe-area-inset-bottom));
+  }
+
+  .sidebarOpen {
+    transform: none;
+  }
+
+  .drawerHeader {
+    display: flex;
+  }
+
+  // Etwas mehr vertikale Luft -> daumengerechte Zeilen.
+  .item,
+  .itemActive {
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+}
+
+// Bewegung respektieren: kein Einfahr-Slide, nur Sichtbarkeit.
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
   }
 }
